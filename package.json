@@ -10,5 +10,8 @@
     "eslint-plugin-html": "^1.5.5",
     "gulp": "gulpjs/gulp#4.0",
     "gulp-eslint": "^3.0.1"
+  },
+  "scripts": {
+    "lint": "gulp lint"
   }
 }
