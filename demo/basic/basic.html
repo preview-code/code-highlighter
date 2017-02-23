@@ -4,6 +4,7 @@ Copyright (c) 2017 Preview-Code. All rights reserved.
 This code may only be used under the BSD style license found in LICENSE.txt
 -->
 <link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-list/iron-list.html">
 <link rel="import" href="../../diff-highlighter.html">
 <dom-module id="basic-demo">
   <template>
@@ -11,33 +12,47 @@ This code may only be used under the BSD style license found in LICENSE.txt
       :host {
         display: block;
       }
+      paper-material {
+        background: white;
+        margin: 1em;
+      }
     </style>
 
-    <diff-highlighter 
-      code="[[diff]]" 
-      before-start="[[beforeStart]]"
-      after-start="[[afterStart]]"></diff-highlighter>
-    
+    <iron-list items="[[diffs]]" as="diff">
+      <template>
+        <div>
+          <paper-material elevation="1">
+            <diff-highlighter 
+              code="[[diff.code]]" 
+              before-start="[[diff.beforeStart]]"
+              after-start="[[diff.afterStart]]"></diff-highlighter>
+          </paper-material>
+        </div>  
+      </template>
+    </iron-list>
+
   </template>
   <script>
     Polymer({
       is: 'basic-demo',
 
       properties: {
-        diff: String,
-        diffId: String,
-        beforeStart: Number,
-        afterStart: Number
+        diffs: Array
       },
 
-      attached: function() {
-        fetch('hunk.json').then(function(response) {
-          return response.json();
-        }).then(function(json) {
-          this.diff = json.diff;
-          this.diffId = json.diffId;
-          this.beforeStart = json.before_start;
-          this.afterStart = json.after_start;
+      created: function() {
+        fetch('hunk.json')
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+          this.diffs = [];
+          this.diffs = json.map(function (x) {
+            return {
+              'code': x.diff,
+              'diffId': x.diff_id,
+              'beforeStart': x.before_start,
+              'afterStart': x.after_start
+            };
+          }.bind(this));
         }.bind(this));
       }
     });

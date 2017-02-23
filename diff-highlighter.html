@@ -35,7 +35,6 @@ Syntax highlighting for textual diffs.
       }
       #codeColumn {
         overflow-x: auto;
-        position: relative;
       }
       span {
         line-height: var(--line-height, 24px);
@@ -48,8 +47,6 @@ Syntax highlighting for textual diffs.
       }
       #diffColors {
         width: 100%;
-        height: 100%;
-        float: right;
         position: absolute;
         top: 0;
         pointer-events: none;
@@ -72,7 +69,7 @@ Syntax highlighting for textual diffs.
     <div id="beforeColumn"></div>
     <div id="afterColumn"></div>
     <div id="codeColumn">
-      <pre><code id="code" class="javascript"></code></pre>
+      <pre><code id="code"></code></pre>
       <div id="diffColors"></div>
     </div>
     
@@ -89,7 +86,11 @@ Syntax highlighting for textual diffs.
 
     properties: {
       code: String,
-      language: String,
+      language: {
+        type: String,
+        reflectToAttribute: true,
+        notify: true
+      },
       beforeStart: Number,
       afterStart: Number,
     },
@@ -129,14 +130,16 @@ Syntax highlighting for textual diffs.
       Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
       Polymer.dom(this.$.afterColumn).innerHTML = afterContent;
 
-      Polymer.dom(this.$.code).innerHTML = hljs.highlightAuto(strippedCode).value;
+      var h = hljs.highlightAuto(strippedCode);
+      Polymer.dom(this.$.code).innerHTML = h.value;
+      this.language = h.language;
       this._updateDiffLines(diffMarks);
     },
 
     _updateDiffLines: function(marks) {
 
-      var createDiv = function(cls, content) {
-        return '<div class="' + cls + '">' + content + '</div>';
+      var createDiv = function(cls) {
+        return '<div class="' + cls + '"></div>';
       }
 
       var markClass = function(mark) {
@@ -145,7 +148,7 @@ Syntax highlighting for textual diffs.
 
       var content = ''
       marks.forEach(function(mark) {
-        content += createDiv(markClass(mark), mark);
+        content += createDiv(markClass(mark));
       });
       Polymer.dom(this.$.diffColors).innerHTML = content;
     }
