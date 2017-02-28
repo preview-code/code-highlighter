@@ -1,0 +1,56 @@
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<link rel="import" href="../../../polymer/polymer.html">
+<link rel="import" href="../../../iron-list/iron-list.html">
+<link rel="import" href="../../diff-group.html">
+<dom-module id="group-demo">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      paper-material {
+        background: white;
+        margin: 1em;
+      }
+    </style>
+
+    <iron-list items="[[diffs]]" as="diff">
+      <template>
+        <div>
+          <paper-material elevation="1">
+            <diff-group hunks=[[diff]]></diff-group>
+          </paper-material>
+        </div>  
+      </template>
+    </iron-list>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'group-demo',
+      properties: {
+        diffs: Array
+      },
+
+      created: function() {
+        fetch('hunk.json')
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+          this.diffs = [];
+          this.diffs = json.map(function (x) {
+            return [{
+              'code': x.diff,
+              'diffId': x.diff_id,
+              'beforeStart': x.before_start,
+              'afterStart': x.after_start
+            }];
+          }.bind(this));
+        }.bind(this));
+      },
+    });
+  </script>
+</dom-module>

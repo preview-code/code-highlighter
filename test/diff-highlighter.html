@@ -41,12 +41,12 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
         it('shows correct amount of `before` lines', function() {
           var beforeLines = filterEmpty(getChildrenForId('beforeColumn'));
-          assert.equal(diff.linesChanged.rangeBefore, beforeLines.length);
+          assert.equal(diff.linesChanged.rangeBefore, beforeLines.length - 1);
         });
 
         it('shows correct amount of `after` lines', function() {
           var afterLines = filterEmpty(getChildrenForId('afterColumn'));
-          assert.equal(diff.linesChanged.rangeAfter, afterLines.length);
+          assert.equal(diff.linesChanged.rangeAfter, afterLines.length - 1);
         });
 
         it('shows correct amount of empty `before` lines', function() {

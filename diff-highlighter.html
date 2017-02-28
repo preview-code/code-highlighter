@@ -6,6 +6,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="highlight-import.html">
 <link rel="import" href="highlight-styles.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
 
 <!--
 Syntax highlighting for textual diffs.
@@ -20,15 +21,19 @@ Syntax highlighting for textual diffs.
         display: flex;
       }
 
-      #beforeColumn, #afterColumn {
+      #beforeColumn, #afterColumn,#iconColumn {
         padding: 0 4px;
         color: #888;
         background-color: #eee;
         font-family: monospace;
         @apply(--line-number-columns);
+      },
+      #beforeColumn, #afterColumn {
+        width: 2em;
       }
       #beforeColumn > span,
-      #afterColumn > span {
+      #afterColumn > span,
+      iron-icon {
         @apply(--line-numbers);
         display: block;
         text-align: center;
@@ -70,6 +75,7 @@ Syntax highlighting for textual diffs.
 
     <div id="beforeColumn"></div>
     <div id="afterColumn"></div>
+    <div id="iconColumn" on-click="_split"></div>
     <div id="codeColumn">
       <pre><code id="code"></code></pre>
       <div id="diffColors"></div>
@@ -95,14 +101,13 @@ Syntax highlighting for textual diffs.
       },
       beforeStart: Number,
       afterStart: Number,
+      amountLines: Number
     },
 
     _onDiffChange: function(code, beforeStart, afterStart) {
       var lines = code.split('\n');
-      // The first and last line may be empty.
-      if (code.charAt(0) === '\n') {
-        lines.shift();
-      }
+
+      // The last line may be empty.
       if (code.charAt(code.length-1) === '\n') {
         lines.pop();
       }
@@ -114,24 +119,35 @@ Syntax highlighting for textual diffs.
         return '<span>' + content + '</span>';
       }
 
+      var createIcon = function(index, before, after) {
+        return '<iron-icon on-click="_split" icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after  +'></iron-icon>';
+      }
+
       var beforeContent = '';
       var afterContent = '';
+      var iconContent = '';
       var strippedCode = [];
       var diffMarks = [];
-      lines.forEach(function(line) {
+      lines.forEach(function(line, index) {
         beforeContent += createSpan(line.startsWith('+') ? '' : before++);
         afterContent += createSpan(line.startsWith('-') ? '' : after++);
+        iconContent += createIcon(index, before, after);
         strippedCode.push(line.substring(1));
         diffMarks.push(line.charAt(0));
       });
+
+      this.amountLines = lines.length;
 
       strippedCode = strippedCode.reduce(function(acc, line) {
         return acc + '\n' + line;
       });
 
       Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
-      Polymer.dom(this.$.afterColumn).innerHTML = afterContent;
-
+      Polymer.dom(this.$.afterColumn).innerHTML = afterContent;    
+        
+      Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
+      
+      this.strippedCode = strippedCode;
       var h = hljs.highlightAuto(strippedCode);
       Polymer.dom(this.$.code).innerHTML = h.value;
       this.language = h.language;
@@ -153,8 +169,19 @@ Syntax highlighting for textual diffs.
         content += createDiv(markClass(mark));
       });
       Polymer.dom(this.$.diffColors).innerHTML = content;
+    },
+    _split: function(e) {
+      if (e.path[0].localName === 'iron-icon') {
+        var attributes = e.path[0].attributes
+        var details = {};
+        details.lineNumber = +attributes[2].nodeValue + 1;
+        details.clickedBefore = attributes[3].nodeValue;
+        details.clickedAfter = attributes[4].nodeValue;
+        if (details.lineNumber !== this.amountLines) {
+         this.fire('split', details);
+        }
+      }
     }
-
   });
   </script>
 </dom-module>

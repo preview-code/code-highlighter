@@ -1,0 +1,78 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>diff-highlighter tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+  <script src='../bower_components/iron-test-helpers/mock-interactions.js'></script>
+
+  <link rel="import" href="../diff-highlighter.html">
+</head>
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <diff-highlighter>
+      </diff-highlighter>
+    </template>
+  </test-fixture>
+  <script>
+
+     suite('<diff-highlighter>', function() {
+      var elem;
+      setup(function() {
+        elem = fixture('basic');
+        elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
+        elem.beforeStart = 0;
+        elem.afterStart = 1;
+
+      });
+      test('tap button fires event', function() {
+        elem.addEventListener('split', function(e) {
+          assert.equal(e.detail.lineNumber, 1);
+        });
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+        MockInteractions.tap(icon);
+      });
+
+     test('tapping all buttons, fires events', function(done) {
+        var count = 0;
+        elem.addEventListener('split', function() {
+          count++;
+          if (count === 14) {
+            done();
+          }
+        });
+        var icons = Polymer.dom(elem.root).querySelectorAll('iron-icon');
+        flush(function() {
+          icons.forEach(function(icon) {
+            MockInteractions.tap(icon);
+          });
+        });
+      });
+
+    test('tapping on last line should not fire', function(done) {
+        elem.code = 'one liner \n'
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+         flush(function() {
+          elem.addEventListener('split', function() {
+            done(new Error('This event should not have been fired'));
+          });
+        });
+        MockInteractions.tap(icon);
+        setTimeout(done, 10);
+      });
+    });
+
+  </script>
+</body>
+</html>

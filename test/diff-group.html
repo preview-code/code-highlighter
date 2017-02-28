@@ -1,0 +1,55 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>diff-group tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../diff-group.html">
+</head>
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <diff-group>
+      <diff-group>
+    </template>
+  </test-fixture>
+  <script>
+
+     suite('<diff-group>', function() {
+      var elem;
+      setup(function() {
+        elem = fixture('basic');
+        var hunk = {};
+        hunk.code = 'first line';        
+        hunk.beforeStart = 0;
+        hunk.afterStart = 1;
+        hunk.indexItem = 5;
+        elem.hunks = [hunk]
+      });
+
+      test('calling method adds hunk', function() {
+        var e = {};
+        e.detail = {};
+        e.detail.code = 'second line';
+        e.detail.beforeStart = 1;
+        e.detail.afterStart = 1;
+        e.detail.index = 1;
+        elem._add(e);
+        assert.equal(elem.hunks.length, 2);
+        assert.deepEqual(elem.hunks[1], {code: 'second line', beforeStart: 1, afterStart: 1});
+      });
+      });
+
+  </script>
+</body>
+</html>

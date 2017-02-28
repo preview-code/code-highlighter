@@ -1,0 +1,67 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>hunk-with-comment tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../iron-test-helpers/mock-interactions.js"></script>
+  <script src='../bower_components/iron-test-helpers/mock-interactions.js'></script>
+
+  <link rel="import" href="../hunk-with-comment.html">
+</head>
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <hunk-with-comment>
+      </hunk-with-comment>
+    </template>
+  </test-fixture>
+  <script>
+
+     suite('<hunk-with-comment>', function() {
+      var elem;
+      setup(function() {
+        elem = fixture('basic');
+        elem.code = 'first line \n second line \n';        
+        elem.beforeStart = 0;
+        elem.afterStart = 1;
+        elem.indexItem = 5;
+      });
+
+      test('calling method fires event', function(done) {
+        elem.addEventListener('add', function(e) {
+          debugger;
+          assert.equal(e.detail.index, 5);
+          done();
+        });
+        var e = {};
+        e.detail = {};
+        e.detail.clickedBefore = 0;
+        e.detail.clickedAfter = 1;
+        e.detail.lineNumber = 5;
+        elem._split(e);
+      });
+
+    test('code is splitted correct', function() {
+        var e = {};
+        e.detail = {};
+        e.detail.clickedBefore = 0;
+        e.detail.clickedAfter = 1;
+        e.detail.lineNumber = 1;
+        elem._split(e);
+        assert.equal(elem.code, 'first line ');
+      });   
+    });
+
+  </script>
+</body>
+</html>

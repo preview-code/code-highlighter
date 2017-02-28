@@ -1,0 +1,56 @@
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="highlight-import.html">
+<link rel="import" href="highlight-styles.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="diff-highlighter.html">
+<link rel="import" href="hunk-with-comment.html">
+
+<!--
+Syntax highlighting for textual diffs.
+
+@demo demo/index.html
+-->
+<dom-module id="diff-group">
+  <template>
+
+    <style >
+      :host {
+        display:block;
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{hunks}}">
+      <hunk-with-comment code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}" index-item="[[index]]"></hunk-with-comment>
+    </template>
+
+  </template>
+
+  <script>
+  Polymer({
+    is: 'diff-group',
+
+    listeners: {
+      'add': '_add'
+    },
+    properties: {
+      hunks: {
+        type: Array,
+        value: function() {
+          return [];
+        }
+      }
+    },
+    _add: function(e) {
+      var details = e.detail;
+      this.splice('hunks', details.index + 1, 0, {code: details.code, beforeStart: details.beforeStart, afterStart: details.afterStart});
+      //Needed to resize the groups, in order to not overlap
+      this.fire('iron-resize');
+   }
+  })
+  </script>
+</dom-module>
