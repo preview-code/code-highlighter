@@ -14,7 +14,8 @@
     "keyword-spacing": 1,
     "quotes": [2, "single", {
       "avoidEscape": true
-    }]
+    }],
+    "indent": ["warn", 2]
   },
   "env": {
     "browser": true
@@ -29,6 +30,8 @@
     "WeakMap": false,
     "test": false,
     "assert": false,
+    "it": false,
+    "describe": false,
     "MockInteractions": false,
     "suite": false,
     "fixture": false,
@@ -39,6 +42,7 @@
     "sinon": false,
     "WCT": false,
     "replace": false,
-    "Sortable": false
+    "hljs": false,
+    "beforeEach": false
   }
 }
