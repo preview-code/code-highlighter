@@ -5,6 +5,7 @@ Copyright (c) 2017 Preview-Code. All rights reserved.
 This code may only be used under the BSD style license found in LICENSE.txt
 -->
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>diff-highlighter tests</title>
@@ -17,6 +18,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
   <link rel="import" href="../diff-highlighter.html">
 </head>
+
 <body>
 
   <test-fixture id="basic">
@@ -26,67 +28,141 @@ This code may only be used under the BSD style license found in LICENSE.txt
     </template>
   </test-fixture>
   <script>
+    describe('<diff-highlighter>', function () {
+      var elem;
+
+      beforeEach(function () {
+        elem = fixture('basic');
+        elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
+        elem.beforeStart = 0;
+        elem.afterStart = 1;
+        elem.canSplit = true;
+      });
+
+      it('tap button fires event', function () {
+        elem.addEventListener('split-hunk', function (e) {
+          assert.equal(e.detail.lineNumber, 1);
+          assert.equal(e.detail.clickedAfter, 2);
+          assert.equal(e.detail.clickedBefore, 1);
+        });
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+        MockInteractions.tap(icon);
+      });
 
   /*global testDiffs*/
     testDiffs.forEach(function(diff) {
       describe('diff: ' + diff.index, function() {
+      it('tapping all buttons, fires events', function (done) {
+        var count = 0;
+        elem.addEventListener('split-hunk', function (e) {
+          count++;
+          assert.equal(e.detail.lineNumber, count);
+          if (count === 14) {
+            done();
+          }
+        });
+        var icons = Polymer.dom(elem.root).querySelectorAll('iron-icon');
+        flush(function () {
+          icons.forEach(function (icon) {
+            MockInteractions.tap(icon);
+          });
+        });
+      });
+
+      it('tapping on last line should not fire', function (done) {
+        elem.code = 'one liner \n'
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+        flush(function () {
+          elem.addEventListener('split-hunk', function () {
+            done(new Error('This event should not have been fired'));
+          });
+        });
+        MockInteractions.tap(icon);
+        setTimeout(done, 10);
+      });
+
+      it('mouseover should show icon', function (done) {
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+        flush(function () {
+          assert.equal(icon.getComputedStyleValue('opacity'), '0');
+          MockInteractions.makeMouseEvent('mouseover', {x: 0, y: 0}, icon);
+          assert.equal(icon.getComputedStyleValue('opacity'), '1');
+          done();
+        });
+      });
+
+      it('mouseout should hide icon', function (done) {
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+        flush(function () {
+          assert.equal(icon.getComputedStyleValue('opacity'), '0');
+          MockInteractions.makeMouseEvent('mouseover', {x: 0, y: 0}, icon);
+          assert.equal(icon.getComputedStyleValue('opacity'), '1');
+          MockInteractions.makeMouseEvent('mouseout', {x: 40, y: 24}, icon);
+          assert.equal(icon.getComputedStyleValue('opacity'), '0');
+          done();
+        });
+      });
+    });
+
+    testDiffs.forEach(function (diff) {
+      describe('diff: ' + diff.index, function () {
         var diffElem;
 
-        beforeEach(function() {
+        beforeEach(function () {
           diffElem = fixture('basic');
           diffElem.code = diff.changes;
           diffElem.beforeStart = diff.linesChanged.startLineBefore;
           diffElem.afterStart = diff.linesChanged.startLineAfter;
         });
 
-        it('shows correct amount of `before` lines', function() {
+        it('shows correct amount of `before` lines', function () {
           var beforeLines = filterEmpty(getChildrenForId('beforeColumn'));
-          assert.equal(diff.linesChanged.rangeBefore, beforeLines.length - 1);
+          assert.equal(diff.linesChanged.rangeBefore, beforeLines.length);
         });
 
-        it('shows correct amount of `after` lines', function() {
-          var afterLines = filterEmpty(getChildrenForId('afterColumn'));
-          assert.equal(diff.linesChanged.rangeAfter, afterLines.length - 1);
+        it('shows correct amount of `after` lines', function () {
+          var afterLines = filterEmpty(getChildrenForId('afterColumn')).length;
+          assert.equal(diff.linesChanged.rangeAfter, afterLines);
         });
 
-        it('shows correct amount of empty `before` lines', function() {
+        it('shows correct amount of empty `before` lines', function () {
           var beforeLines = filterNonEmpty(getChildrenForId('beforeColumn'));
           var diffLines = diff.changes.split('\n')
-          var emptyBeforeLines = diffLines.filter(function(line) {
+          var emptyBeforeLines = diffLines.filter(function (line) {
             return line.startsWith('+');
           });
           assert.equal(emptyBeforeLines.length, beforeLines.length);
         });
 
-        it('shows correct amount of empty `after` lines', function() {
+        it('shows correct amount of empty `after` lines', function () {
           var afterLines = filterNonEmpty(getChildrenForId('afterColumn'));
           var diffLines = diff.changes.split('\n')
-          var emptyAfterLines = diffLines.filter(function(line) {
+          var emptyAfterLines = diffLines.filter(function (line) {
             return line.startsWith('-');
           });
           assert.equal(emptyAfterLines.length, afterLines.length);
         });
 
 
-        var getChildrenForId = function(id) {
+        var getChildrenForId = function (id) {
           return [].slice.call(Polymer.dom(diffElem.root).querySelector('#' + id).children)
         }
 
-        var filterEmpty = function(elems) {
-          return elems.filter(function(e) {
-            return e.innerHTML !== '';
+        var filterEmpty = function (elems) {
+          return elems.filter(function (e) {
+            return !e.classList.contains('empty');
           });
         }
 
-        var filterNonEmpty = function(elems) {
-          return elems.filter(function(e) {
-            return e.innerHTML === '';
+        var filterNonEmpty = function (elems) {
+          return elems.filter(function (e) {
+            return e.classList.contains('empty');
           });
         }
 
       });
     });
-
   </script>
 </body>
+
 </html>

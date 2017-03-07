@@ -19,39 +19,53 @@ Syntax highlighting for textual diffs.
     <style include="highlight-styles">
       :host {
         display: flex;
+        font-family: monospace;
       }
-
-      #beforeColumn, #afterColumn,#iconColumn {
+      
+      #beforeColumn,
+      #afterColumn {
         padding: 0 4px;
         color: #888;
         background-color: #eee;
-        font-family: monospace;
         @apply(--line-number-columns);
-      },
-      #beforeColumn, #afterColumn {
-        width: 2em;
       }
+      
+      #iconColumn {
+        background-color: #eee;
+        color: #888;
+        width: 0em;
+      }
+      
       #beforeColumn > span,
-      #afterColumn > span,
-      iron-icon {
+      #afterColumn > span {
         @apply(--line-numbers);
         display: block;
         text-align: center;
       }
+      
+      iron-icon {
+        display: block;
+        opacity: 0;
+        z-index: 10;
+      }
+      
       #codeColumn {
         overflow-x: auto;
         width: 100%;
         position: relative;
       }
+      
       span {
         line-height: var(--line-height, 24px);
         height: var(--line-height, 24px);
       }
+      
       pre {
         overflow-x: auto;
         line-height: var(--line-height, 24px);
         margin: 0;
       }
+      
       #diffColors {
         width: 100%;
         position: absolute;
@@ -61,127 +75,191 @@ Syntax highlighting for textual diffs.
         right: 0;
         opacity: 0.2;
       }
-
+      
       #diffColors div {
         height: var(--line-height, 24px);
       }
+      
       #diffColors .add {
         background-color: var(--add-color, green);
       }
+      
       #diffColors .del {
         background-color: var(--add-color, red);
+      }
+      
+      .empty {
+        user-select: none;
+        color: #eee;
       }
     </style>
 
     <div id="beforeColumn"></div>
     <div id="afterColumn"></div>
-    <div id="iconColumn" on-click="_split"></div>
+    <div id="iconColumn" on-click="_split" hidden$="[[!canSplit]]"></div>
     <div id="codeColumn">
       <pre><code id="code"></code></pre>
       <div id="diffColors"></div>
     </div>
-    
+
 
   </template>
 
   <script>
-  Polymer({
-    is: 'diff-highlighter',
+    Polymer({
+      is: 'diff-highlighter',
+      observers: [
+        '_onDiffChange(code, beforeStart, afterStart)'
+      ],
 
-    observers: [
-      '_onDiffChange(code, beforeStart, afterStart)'
-    ],
-
-    properties: {
-      code: String,
-      language: {
-        type: String,
-        reflectToAttribute: true,
-        notify: true
-      },
-      beforeStart: Number,
-      afterStart: Number,
-      amountLines: Number
-    },
-
-    _onDiffChange: function(code, beforeStart, afterStart) {
-      var lines = code.split('\n');
-
-      // The last line may be empty.
-      if (code.charAt(code.length-1) === '\n') {
-        lines.pop();
-      }
-
-      var before = beforeStart;
-      var after = afterStart;
-
-      var createSpan = function(content) {
-        return '<span>' + content + '</span>';
-      }
-
-      var createIcon = function(index, before, after) {
-        return '<iron-icon on-click="_split" icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after  +'></iron-icon>';
-      }
-
-      var beforeContent = '';
-      var afterContent = '';
-      var iconContent = '';
-      var strippedCode = [];
-      var diffMarks = [];
-      lines.forEach(function(line, index) {
-        beforeContent += createSpan(line.startsWith('+') ? '' : before++);
-        afterContent += createSpan(line.startsWith('-') ? '' : after++);
-        iconContent += createIcon(index, before, after);
-        strippedCode.push(line.substring(1));
-        diffMarks.push(line.charAt(0));
-      });
-
-      this.amountLines = lines.length;
-
-      strippedCode = strippedCode.reduce(function(acc, line) {
-        return acc + '\n' + line;
-      });
-
-      Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
-      Polymer.dom(this.$.afterColumn).innerHTML = afterContent;    
-        
-      Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
-      
-      this.strippedCode = strippedCode;
-      var h = hljs.highlightAuto(strippedCode);
-      Polymer.dom(this.$.code).innerHTML = h.value;
-      this.language = h.language;
-      this._updateDiffLines(diffMarks);
-    },
-
-    _updateDiffLines: function(marks) {
-
-      var createDiv = function(cls) {
-        return '<div class="' + cls + '"></div>';
-      }
-
-      var markClass = function(mark) {
-        return mark === '+' ? 'add' : mark === '-' ? 'del' : 'normal';
-      }
-
-      var content = ''
-      marks.forEach(function(mark) {
-        content += createDiv(markClass(mark));
-      });
-      Polymer.dom(this.$.diffColors).innerHTML = content;
-    },
-    _split: function(e) {
-      if (e.path[0].localName === 'iron-icon') {
-        var attributes = e.path[0].attributes
-        var details = {};
-        details.lineNumber = +attributes[2].nodeValue + 1;
-        details.clickedBefore = attributes[3].nodeValue;
-        details.clickedAfter = attributes[4].nodeValue;
-        if (details.lineNumber !== this.amountLines) {
-         this.fire('split', details);
+      properties: {
+        code: String,
+        language: {
+          type: String,
+          reflectToAttribute: true,
+          notify: true
+        },
+        beforeStart: Number,
+        afterStart: Number,
+        amountLines: Number,
+        canSplit: {
+          type: Boolean,
+          value: false
         }
-      }
-    }
-  });
+      },
+      attached: function () {
+        var _this = this;
+
+        var over = function (e) {
+          var path = _this._getComposedPath(e)[0];
+          var index = path.getAttribute('index');
+          if (path.localName === 'iron-icon') {
+            path.style.opacity = 1;
+          }
+          else if (index) {
+            var icon = Polymer.dom(_this.$.iconColumn).querySelectorAll('iron-icon')[index];
+          icon.style.opacity = 1;
+          }
+        }
+
+        var out = function (e) {
+          var path = _this._getComposedPath(e)[0];
+          var index = path.getAttribute('index');
+          if (path.localName === 'iron-icon') {
+            path.style.opacity = 0;
+          }
+          else if (index) {
+            var icon = Polymer.dom(_this.$.iconColumn).querySelectorAll('iron-icon')[index];
+            icon.style.opacity = 0;
+          }
+        }
+
+        this.$.beforeColumn.addEventListener('mouseover', over);
+        this.$.beforeColumn.addEventListener('mouseout', out);
+        this.$.afterColumn.addEventListener('mouseover', over);
+        this.$.afterColumn.addEventListener('mouseout', out);
+        this.$.iconColumn.addEventListener('mouseover', over);
+        this.$.iconColumn.addEventListener('mouseout', out);
+      },
+
+      _onDiffChange: function (code, beforeStart, afterStart) {
+        var lines = code.split('\n');
+
+        // The last line may be empty.
+        if (code.charAt(code.length - 1) === '\n') {
+          lines.pop();
+        }
+
+        var before = beforeStart;
+        var after = afterStart;
+
+        var createSpan = function (content, index, other) {
+          if (content !== '') {
+            return '<span class="linenumber" index="' + index + '">' + content + '</span>';
+          }
+          return '<span class="empty" index="' + index + '">' + other + '</span>';
+        }
+
+        var createIcon = function (index, before, after) {
+          return '<iron-icon icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after + '></iron-icon>';
+        }
+
+        var beforeContent = '';
+        var afterContent = '';
+        var iconContent = '';
+        var strippedCode = [];
+        var diffMarks = [];
+        lines.forEach(function (line, index) {
+          beforeContent += createSpan(line.startsWith('+') ? '' : before++, index, after);
+          afterContent += createSpan(line.startsWith('-') ? '' : after++, index, before);
+          iconContent += createIcon(index, before, after);
+          strippedCode.push(line.substring(1));
+          diffMarks.push(line.charAt(0));
+        });
+
+        this.amountLines = lines.length;
+
+        strippedCode = strippedCode.reduce(function (acc, line) {
+          return acc + '\n' + line;
+        });
+
+        Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
+        Polymer.dom(this.$.afterColumn).innerHTML = afterContent;
+
+        Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
+
+        var h = hljs.highlightAuto(strippedCode);
+        Polymer.dom(this.$.code).innerHTML = h.value;
+        this.language = h.language;
+        this._updateDiffLines(diffMarks);
+      },
+
+      _updateDiffLines: function (marks) {
+
+        var createDiv = function (cls) {
+          return '<div class="' + cls + '"></div>';
+        }
+
+        var markClass = function (mark) {
+          return mark === '+' ? 'add' : mark === '-' ? 'del' : 'normal';
+        }
+
+        var content = ''
+        marks.forEach(function (mark) {
+          content += createDiv(markClass(mark));
+        });
+        Polymer.dom(this.$.diffColors).innerHTML = content;
+      },
+      _split: function (e) {
+        var path = this._getComposedPath(e)[0];
+        if (path.localName === 'iron-icon') {
+          var details = {};
+          details.lineNumber = Number(path.getAttribute('index')) + 1;
+          details.clickedBefore = path.getAttribute('before');
+          details.clickedAfter = path.getAttribute('after');
+          if (details.lineNumber !== this.amountLines) {
+            this.fire('split-hunk', details);
+          }
+        }
+      },
+
+      // For browsers that support neither Event.path and Event.composedPath.
+      // from: https://stackoverflow.com/questions/36845515/mouseevent-path-equivalent-in-firefox-safari
+      _getComposedPath: function (e) {
+        var path = e.path || (e.composedPath && e.composedPath()) || [];
+        if (path.length === 0) {
+          var currentElem = e.target;
+          while (currentElem) {
+            path.push(currentElem);
+            currentElem = currentElem.parentElement;
+          }
+          if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
+            path.push(document);
+          if (path.indexOf(window) === -1)
+            path.push(window);
+        }
+        return path;
+      },
+    });
   </script>
 </dom-module>

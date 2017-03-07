@@ -10,50 +10,48 @@ This code may only be used under the BSD style license found in LICENSE.txt
 <dom-module id="hunk-with-comment">
   <template>
 
-    <style >
+    <style>
       :host {
-        display:block
+        display: block
       }
     </style>
 
-    <diff-highlighter code="{{code}}" before-start="[[beforeStart]]" after-start="[[afterStart]]"></diff-highlighter>
+    <diff-highlighter code="{{code}}" before-start="[[beforeStart]]" after-start="[[afterStart]]" can-split="true"></diff-highlighter>
     <div> This is a comment diff </div>
   </template>
 
   <script>
-  Polymer({
-    is: 'hunk-with-comment',
-    listeners: {
-      'split': '_split'
-    },
-    properties: {
-      code: {
-        type: String,
-        notify: true
+    Polymer({
+      is: 'hunk-with-comment',
+      listeners: {
+        'split-hunk': '_split'
       },
-      beforeStart: {
-        type: Number,
-        notify: true
+      properties: {
+        code: {
+          type: String,
+          notify: true
+        },
+        beforeStart: {
+          type: Number,
+          notify: true
+        },
+        afterStart: {
+          type: Number,
+          notify: true
+        },
+        indexItem: Number
       },
-      afterStart: {
-        type: Number,
-        notify: true
-      },
-      indexItem: Number
-    },
-    _split: function(e) {
-      var x = this.code.split('\n');
-      var newElem = {};
-      newElem.code = x.slice(+e.detail.lineNumber, this.code.length -1).join('\n');
-      newElem.beforeStart = e.detail.clickedBefore;
-      newElem.afterStart = e.detail.clickedAfter;
-      newElem.index = this.indexItem;
+      _split: function (e) {
+        var x = this.code.split('\n');
+        var newElem = {};
+        newElem.code = x.slice(+e.detail.lineNumber, this.code.length - 1).join('\n');
+        newElem.beforeStart = e.detail.clickedBefore;
+        newElem.afterStart = e.detail.clickedAfter;
+        newElem.index = this.indexItem;
+        this.code = x.slice(0, e.detail.lineNumber).join('\n');
+        this.fire('add-hunk', newElem);
 
-      this.code = x.slice(0, e.detail.lineNumber).join('\n');
-
-      this.fire('add', newElem);
-
-    }
-  });
+      }
+    });
   </script>
 </dom-module>

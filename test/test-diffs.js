@@ -239,7 +239,7 @@ var testDiffs = [
     file: {name: 'a', created: true},
     diffId: '@@ -0,0 +1 @@',
     fileNameUrl: 'a',
-    changes: '\n+one line',
+    changes: '+one line',
     linesChanged: { startLineBefore: 0, rangeBefore: 0,
       startLineAfter: 1,  rangeAfter: 1 }
   },
@@ -248,7 +248,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1 +1,2 @@',
     fileNameUrl: 'a',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     '+line two',
     linesChanged: { startLineBefore: 1, rangeBefore: 1,
       startLineAfter: 1,  rangeAfter: 2 }
@@ -258,7 +258,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,2 +1,3 @@',
     fileNameUrl: 'a',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     '+line inbetween\n' +
     ' line two',
     linesChanged: { startLineBefore: 1, rangeBefore: 2,
@@ -269,7 +269,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,3 +1,5 @@',
     fileNameUrl: 'a',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     ' line inbetween\n' +
     '+another line\n' +
     '+hello world\n' +
@@ -282,7 +282,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,5 +1,5 @@',
     fileNameUrl: 'a',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     ' line inbetween\n' +
     ' another line\n' +
     '-hello world\n' +
@@ -296,7 +296,7 @@ var testDiffs = [
     file: {name: 'b'},
     diffId: '@@ -1,5 +1,5 @@',
     fileNameUrl: 'b',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     ' line inbetween\n' +
     '-another line\n' +
     ' replace a line\n' +
@@ -310,7 +310,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,5 +1,4 @@',
     fileNameUrl: 'a',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     ' line inbetween\n' +
     '-replace a line\n' +
     ' another line\n' +
@@ -323,7 +323,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,4 +1,3 @@',
     fileNameUrl: 'a',
-    changes: '\n one line\n' +
+    changes: 'one line\n' +
     ' line inbetween\n' +
     ' another line\n' +
     '-line two',
@@ -335,7 +335,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,3 +1,3 @@',
     fileNameUrl: 'a',
-    changes: '\n-one line\n' +
+    changes: '-one line\n' +
     ' line inbetween\n' +
     ' another line\n' +
     '+add last',
@@ -347,7 +347,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,3 +1,2 @@',
     fileNameUrl: 'a',
-    changes: '\n-line inbetween\n' +
+    changes: '-line inbetween\n' +
     ' another line\n' +
     ' add last',
     linesChanged: { startLineBefore: 1, rangeBefore: 3,
@@ -358,7 +358,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -1,2 +0,0 @@',
     fileNameUrl: 'a',
-    changes: '\n-another line\n' +
+    changes: '-another line\n' +
     '-add last',
     linesChanged: { startLineBefore: 1, rangeBefore: 2,
       startLineAfter: 0,  rangeAfter: 0 }
@@ -368,7 +368,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -3,8 +3,6 @@',
     fileNameUrl: 'a',
-    changes: '\n Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
+    changes: 'Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
     ' Maecenas sit amet turpis condimentum enim volutpat imperdiet.\n' +
     ' Vestibulum at sem convallis, congue erat porttitor, mattis dui.\n' +
     '-Donec scelerisque massa in dignissim egestas.\n' +
@@ -384,7 +384,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -340,6 +338,8 @@',
     fileNameUrl: 'a',
-    changes: '\n Sed malesuada orci non pulvinar dictum.\n' +
+    changes: 'Sed malesuada orci non pulvinar dictum.\n' +
     ' Etiam convallis augue nec posuere convallis.\n' +
     ' Proin molestie turpis a orci ultricies, nec porta urna fringilla.\n' +
     '+Donec scelerisque massa in dignissim egestas.\n' +
@@ -400,7 +400,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -343,3 +341,5 @@',
     fileNameUrl: 'a',
-    changes: '\n Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
+    changes: 'Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
     ' Morbi fermentum neque sit amet ante eleifend, non molestie nulla pretium.\n' +
     ' Integer non turpis eu quam bibendum pulvinar vel non ante.\n' +
     '+Etiam vel nibh aliquam, dignissim nunc vel, ultrices sapien.\n' +
@@ -413,7 +413,7 @@ var testDiffs = [
     file: {name: 'a'},
     diffId: '@@ -341,5 +343,3 @@',
     fileNameUrl: 'a',
-    changes: '\n Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
+    changes: 'Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
     ' Morbi fermentum neque sit amet ante eleifend, non molestie nulla pretium.\n' +
     ' Integer non turpis eu quam bibendum pulvinar vel non ante.\n' +
     '-Etiam vel nibh aliquam, dignissim nunc vel, ultrices sapien.\n' +
@@ -426,7 +426,7 @@ var testDiffs = [
     file: {name: 'b', moved: true, from: 'a'},
     diffId: '@@ -341,5 +343,3 @@',
     fileNameUrl: 'fromatob',
-    changes: '\n Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
+    changes: 'Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
     ' Morbi fermentum neque sit amet ante eleifend, non molestie nulla pretium.\n' +
     ' Integer non turpis eu quam bibendum pulvinar vel non ante.\n' +
     '-Etiam vel nibh aliquam, dignissim nunc vel, ultrices sapien.\n' +
@@ -442,7 +442,7 @@ testDiffsWithDelete.push({
   file: {name: 'a', deleted: true},
   diffId: '@@ -341,5 +343,3 @@',
   fileNameUrl: 'a',
-  changes: '\n-Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
+  changes: '-Pellentesque a nulla a libero molestie blandit vitae id eros.\n' +
   '-Morbi fermentum neque sit amet ante eleifend, non molestie nulla pretium.\n' +
   '-Integer non turpis eu quam bibendum pulvinar vel non ante.\n' +
   '-Etiam vel nibh aliquam, dignissim nunc vel, ultrices sapien.\n' +

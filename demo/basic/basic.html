@@ -41,7 +41,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
       },
 
       created: function() {
-        fetch('hunk.json')
+        fetch('../hunk.json')
         .then(function(response) { return response.json(); })
         .then(function(json) {
           this.diffs = [];

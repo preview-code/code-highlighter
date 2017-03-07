@@ -18,9 +18,9 @@ Syntax highlighting for textual diffs.
 <dom-module id="diff-group">
   <template>
 
-    <style >
+    <style>
       :host {
-        display:block;
+        display: block;
       }
     </style>
 
@@ -29,28 +29,28 @@ Syntax highlighting for textual diffs.
     </template>
 
   </template>
-
+  
   <script>
-  Polymer({
-    is: 'diff-group',
+    Polymer({
+      is: 'diff-group',
 
-    listeners: {
-      'add': '_add'
-    },
-    properties: {
-      hunks: {
-        type: Array,
-        value: function() {
-          return [];
+      listeners: {
+        'add-hunk': '_add'
+      },
+      properties: {
+        hunks: {
+          type: Array,
+          value: function () {
+            return [];
+          }
         }
+      },
+      _add: function (e) {
+        var details = e.detail;
+        this.splice('hunks', details.index + 1, 0, {code: details.code, beforeStart: details.beforeStart, afterStart: details.afterStart});
+        //Needed to resize the groups, in order to not overlap
+        this.fire('iron-resize');
       }
-    },
-    _add: function(e) {
-      var details = e.detail;
-      this.splice('hunks', details.index + 1, 0, {code: details.code, beforeStart: details.beforeStart, afterStart: details.afterStart});
-      //Needed to resize the groups, in order to not overlap
-      this.fire('iron-resize');
-   }
-  })
+    })
   </script>
 </dom-module>
