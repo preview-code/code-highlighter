@@ -8,7 +8,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
 <head>
   <meta charset="UTF-8">
-  <title>diff-highlighter tests</title>
+  <title>code-highlighter tests</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
@@ -16,19 +16,19 @@ This code may only be used under the BSD style license found in LICENSE.txt
   <script src="../../iron-test-helpers/mock-interactions.js"></script>
   <script src='test-diffs.js'></script>
 
-  <link rel="import" href="../diff-highlighter.html">
+  <link rel="import" href="../code-highlighter.html">
 </head>
 
 <body>
 
   <test-fixture id="basic">
     <template>
-      <diff-highlighter>
-      </diff-highlighter>
+      <code-highlighter>
+      </code-highlighter>
     </template>
   </test-fixture>
   <script>
-    describe('<diff-highlighter>', function () {
+    describe('<code-highlighter>', function () {
       var elem;
 
       beforeEach(function () {

@@ -13,7 +13,7 @@ Syntax highlighting for textual diffs.
 
 @demo demo/index.html
 -->
-<dom-module id="diff-highlighter">
+<dom-module id="code-highlighter">
   <template>
 
     <style include="highlight-styles">
@@ -103,7 +103,7 @@ Syntax highlighting for textual diffs.
 
   <script>
     Polymer({
-      is: 'diff-highlighter',
+      is: 'code-highlighter',
       observers: [
         '_onDiffChange(code, beforeStart, afterStart)'
       ],
