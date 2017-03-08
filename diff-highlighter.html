@@ -24,20 +24,16 @@ Syntax highlighting for textual diffs.
       
       #beforeColumn,
       #afterColumn {
-        padding: 0 4px;
-        color: #888;
-        background-color: #eee;
         @apply(--line-number-columns);
       }
       
       #iconColumn {
-        background-color: #eee;
-        color: #888;
         width: 0em;
       }
       
       #beforeColumn > span,
       #afterColumn > span {
+        padding: 0 4px;
         @apply(--line-numbers);
         display: block;
         text-align: center;
@@ -46,7 +42,8 @@ Syntax highlighting for textual diffs.
       iron-icon {
         display: block;
         opacity: 0;
-        z-index: 10;
+        z-index: 1;
+        @apply(--line-icon-button)
       }
       
       #codeColumn {
@@ -85,18 +82,17 @@ Syntax highlighting for textual diffs.
       }
       
       #diffColors .del {
-        background-color: var(--add-color, red);
+        background-color: var(--del-color, red);
       }
       
       .empty {
-        user-select: none;
-        color: #eee;
+        visibility: hidden;
       }
     </style>
 
     <div id="beforeColumn"></div>
     <div id="afterColumn"></div>
-    <div id="iconColumn" on-click="_split" hidden$="[[!canSplit]]"></div>
+    <div id="iconColumn" on-tap="_splitHunk" hidden$="[[!canSplit]]"></div>
     <div id="codeColumn">
       <pre><code id="code"></code></pre>
       <div id="diffColors"></div>
@@ -113,53 +109,48 @@ Syntax highlighting for textual diffs.
       ],
 
       properties: {
-        code: String,
+        code: {
+          type: String,
+          notify: true
+        },
         language: {
           type: String,
           reflectToAttribute: true,
           notify: true
         },
-        beforeStart: Number,
-        afterStart: Number,
-        amountLines: Number,
+        beforeStart: {
+          type: Number,
+          notify: true
+        },
+        afterStart: {
+          type: Number,
+          notify: true
+        },
+        _amountLines: Number,
         canSplit: {
           type: Boolean,
           value: false
-        }
+        },
+        index: Number
       },
       attached: function () {
-        var _this = this;
+        this._onMouseHover = this._onMouseHover.bind(this);
 
-        var over = function (e) {
-          var path = _this._getComposedPath(e)[0];
-          var index = path.getAttribute('index');
-          if (path.localName === 'iron-icon') {
-            path.style.opacity = 1;
-          }
-          else if (index) {
-            var icon = Polymer.dom(_this.$.iconColumn).querySelectorAll('iron-icon')[index];
-          icon.style.opacity = 1;
-          }
-        }
+        this.$.beforeColumn.addEventListener('mouseover', this._onMouseHover);
+        this.$.beforeColumn.addEventListener('mouseout', this._onMouseHover);
+        this.$.afterColumn.addEventListener('mouseover', this._onMouseHover);
+        this.$.afterColumn.addEventListener('mouseout', this._onMouseHover);
+        this.$.iconColumn.addEventListener('mouseover', this._onMouseHover);
+        this.$.iconColumn.addEventListener('mouseout', this._onMouseHover);
+      },
+      detached: function () {
 
-        var out = function (e) {
-          var path = _this._getComposedPath(e)[0];
-          var index = path.getAttribute('index');
-          if (path.localName === 'iron-icon') {
-            path.style.opacity = 0;
-          }
-          else if (index) {
-            var icon = Polymer.dom(_this.$.iconColumn).querySelectorAll('iron-icon')[index];
-            icon.style.opacity = 0;
-          }
-        }
-
-        this.$.beforeColumn.addEventListener('mouseover', over);
-        this.$.beforeColumn.addEventListener('mouseout', out);
-        this.$.afterColumn.addEventListener('mouseover', over);
-        this.$.afterColumn.addEventListener('mouseout', out);
-        this.$.iconColumn.addEventListener('mouseover', over);
-        this.$.iconColumn.addEventListener('mouseout', out);
+        this.$.beforeColumn.removeEventListener('mouseover', this._onMouseHover);
+        this.$.beforeColumn.removeEventListener('mouseout', this._onMouseHover);
+        this.$.afterColumn.removeEventListener('mouseover', this._onMouseHover);
+        this.$.afterColumn.removeEventListener('mouseout', this._onMouseHover);
+        this.$.iconColumn.removeEventListener('mouseover', this._onMouseHover);
+        this.$.iconColumn.removeEventListener('mouseout', this._onMouseHover);
       },
 
       _onDiffChange: function (code, beforeStart, afterStart) {
@@ -197,7 +188,7 @@ Syntax highlighting for textual diffs.
           diffMarks.push(line.charAt(0));
         });
 
-        this.amountLines = lines.length;
+        this._amountLines = lines.length;
 
         strippedCode = strippedCode.reduce(function (acc, line) {
           return acc + '\n' + line;
@@ -230,16 +221,19 @@ Syntax highlighting for textual diffs.
         });
         Polymer.dom(this.$.diffColors).innerHTML = content;
       },
-      _split: function (e) {
+
+      _splitHunk: function (e) {
         var path = this._getComposedPath(e)[0];
-        if (path.localName === 'iron-icon') {
-          var details = {};
-          details.lineNumber = Number(path.getAttribute('index')) + 1;
-          details.clickedBefore = path.getAttribute('before');
-          details.clickedAfter = path.getAttribute('after');
-          if (details.lineNumber !== this.amountLines) {
-            this.fire('split-hunk', details);
-          }
+        var lineNumber = Number(path.getAttribute('index')) + 1;
+        if (path.localName === 'iron-icon' && lineNumber !== this._amountLines) {
+          var newElem = {};
+          var x = this.code.split('\n');
+          newElem.code = x.slice(lineNumber, this.code.length - 1).join('\n');
+          newElem.beforeStart = path.getAttribute('before');
+          newElem.afterStart = path.getAttribute('after');
+          newElem.index = this.index;
+          this.code = x.slice(0, lineNumber).join('\n');
+          this.fire('add-hunk', newElem);
         }
       },
 
@@ -260,6 +254,17 @@ Syntax highlighting for textual diffs.
         }
         return path;
       },
+
+      _onMouseHover: function (e) {
+        var path = this._getComposedPath(e)[0];
+        var index = path.getAttribute('index');
+        if (path.localName === 'iron-icon') {
+          path.style.opacity = e.type === 'mouseover' ? 1 : 0;
+        } else if (index) {
+          var icon = Polymer.dom(this.$.iconColumn).querySelectorAll('iron-icon')[index];
+          icon.style.opacity = e.type === 'mouseover' ? 1 : 0;
+        }
+      }
     });
   </script>
 </dom-module>

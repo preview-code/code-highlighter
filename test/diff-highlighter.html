@@ -33,39 +33,52 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
       beforeEach(function () {
         elem = fixture('basic');
-        elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
+        elem.code = 'first line \n second line \n';
         elem.beforeStart = 0;
         elem.afterStart = 1;
         elem.canSplit = true;
+        elem.index = 0;
       });
 
       it('tap button fires event', function () {
-        elem.addEventListener('split-hunk', function (e) {
-          assert.equal(e.detail.lineNumber, 1);
-          assert.equal(e.detail.clickedAfter, 2);
-          assert.equal(e.detail.clickedBefore, 1);
+        elem.addEventListener('add-hunk', function (e) {
+          assert.equal(e.detail.beforeStart, elem.beforeStart + 1)
+          assert.equal(e.detail.afterStart, elem.afterStart + 1)
+          assert.equal(e.detail.code, ' second line \n');
+          assert.equal(e.detail.index, elem.index);
         });
         var icon = Polymer.dom(elem.root).querySelector('iron-icon');
         MockInteractions.tap(icon);
       });
 
-  /*global testDiffs*/
-    testDiffs.forEach(function(diff) {
-      describe('diff: ' + diff.index, function() {
-      it('tapping all buttons, fires events', function (done) {
-        var count = 0;
-        elem.addEventListener('split-hunk', function (e) {
-          count++;
-          assert.equal(e.detail.lineNumber, count);
-          if (count === 14) {
-            done();
-          }
+      it('calling method fires event', function () {
+        elem.addEventListener('add-hunk', function (e) {
+          assert.equal(e.detail.beforeStart, 0)
+          assert.equal(e.detail.afterStart, 1)
+          assert.equal(e.detail.code, ' second line \n');
+          assert.equal(e.detail.index, 1);
         });
-        var icons = Polymer.dom(elem.root).querySelectorAll('iron-icon');
-        flush(function () {
-          icons.forEach(function (icon) {
-            MockInteractions.tap(icon);
+        elem.fire('add-hunk', {beforeStart: 0, afterStart: 1, code: ' second line \n', index: 1});
+      });
+
+      it('code is splitted correct', function () {
+        elem.addEventListener('add-hunk', function (e) {
+          assert.equal(e.detail.code, ' second line \n');
+        });
+        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
+        MockInteractions.tap(icon);
+        assert.equal(elem.code, 'first line ');
+      });
+
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].forEach(function (count) {
+        it('tapping all buttons, fires events', function (done) {
+          elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
+          elem.addEventListener('add-hunk', function (e) {
+            assert.equal(e.detail.index, elem.index);
+            done();
           });
+          var icons = Polymer.dom(elem.root).querySelectorAll('iron-icon');
+          MockInteractions.tap(icons[count]);
         });
       });
 
@@ -73,7 +86,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         elem.code = 'one liner \n'
         var icon = Polymer.dom(elem.root).querySelector('iron-icon');
         flush(function () {
-          elem.addEventListener('split-hunk', function () {
+          elem.addEventListener('add-hunk', function () {
             done(new Error('This event should not have been fired'));
           });
         });
@@ -104,10 +117,10 @@ This code may only be used under the BSD style license found in LICENSE.txt
       });
     });
 
+    /* global testDiffs */
     testDiffs.forEach(function (diff) {
       describe('diff: ' + diff.index, function () {
         var diffElem;
-
         beforeEach(function () {
           diffElem = fixture('basic');
           diffElem.code = diff.changes;

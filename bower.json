@@ -31,7 +31,8 @@
     "paper-material": "^1.0.6",
     "test-fixture": "^1.0.0",
     "iron-test-helpers": "txsmith/iron-test-helpers#master",
-    "iron-list": "^1.4.1"
+    "iron-list": "^1.4.1",
+    "iron-icon": "^1.0.12"
   },
   "keywords": [
     "web-components",

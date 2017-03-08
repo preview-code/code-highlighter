@@ -16,16 +16,13 @@ This code may only be used under the BSD style license found in LICENSE.txt
       }
     </style>
 
-    <diff-highlighter code="{{code}}" before-start="[[beforeStart]]" after-start="[[afterStart]]" can-split="true"></diff-highlighter>
+    <diff-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true" index="[[indexItem]]"></diff-highlighter>
     <div> This is a comment diff </div>
   </template>
 
   <script>
     Polymer({
       is: 'hunk-with-comment',
-      listeners: {
-        'split-hunk': '_split'
-      },
       properties: {
         code: {
           type: String,
@@ -40,17 +37,6 @@ This code may only be used under the BSD style license found in LICENSE.txt
           notify: true
         },
         indexItem: Number
-      },
-      _split: function (e) {
-        var x = this.code.split('\n');
-        var newElem = {};
-        newElem.code = x.slice(+e.detail.lineNumber, this.code.length - 1).join('\n');
-        newElem.beforeStart = e.detail.clickedBefore;
-        newElem.afterStart = e.detail.clickedAfter;
-        newElem.index = this.indexItem;
-        this.code = x.slice(0, e.detail.lineNumber).join('\n');
-        this.fire('add-hunk', newElem);
-
       }
     });
   </script>

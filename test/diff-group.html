@@ -22,19 +22,19 @@ This code may only be used under the BSD style license found in LICENSE.txt
   <test-fixture id="basic">
     <template>
       <diff-group>
-        <diff-group>
+      </diff-group>
     </template>
   </test-fixture>
   <script>
-    suite('<diff-group>', function () {
+    describe('<diff-group>', function () {
       var elem;
-      setup(function () {
+      beforeEach(function () {
         elem = fixture('basic');
         var hunk = {};
         elem.hunks = [hunk]
       });
 
-      test('calling method adds hunk', function () {
+      it('calling method adds hunk', function () {
         elem.fire('add-hunk', {code: 'second line', beforeStart: 1, afterStart: 1, index: 1})
         assert.equal(elem.hunks.length, 2);
         assert.deepEqual(elem.hunks[1], {code: 'second line', beforeStart: 1, afterStart: 1});

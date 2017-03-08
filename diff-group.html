@@ -35,7 +35,7 @@ Syntax highlighting for textual diffs.
       is: 'diff-group',
 
       listeners: {
-        'add-hunk': '_add'
+        'add-hunk': '_addHunk'
       },
       properties: {
         hunks: {
@@ -45,11 +45,9 @@ Syntax highlighting for textual diffs.
           }
         }
       },
-      _add: function (e) {
+      _addHunk: function (e) {
         var details = e.detail;
         this.splice('hunks', details.index + 1, 0, {code: details.code, beforeStart: details.beforeStart, afterStart: details.afterStart});
-        //Needed to resize the groups, in order to not overlap
-        this.fire('iron-resize');
       }
     })
   </script>
