@@ -5,7 +5,9 @@
     "eqeqeq": 1,
     "no-else-return": 1,
     "array-bracket-spacing": 1,
-    "brace-style": 1,
+    "brace-style": [1, "1tbs", {
+      "allowSingleLine": true
+    }],
     "comma-spacing": 1,
     "eol-last": 1,
     "key-spacing": 1,
