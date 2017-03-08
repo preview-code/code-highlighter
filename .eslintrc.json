@@ -24,24 +24,14 @@
     "html"
   ],
   "globals": {
-    "CustomElements": false,
-    "HTMLImports": false,
     "Polymer": false,
-    "WeakMap": false,
-    "test": false,
     "assert": false,
     "it": false,
     "describe": false,
     "MockInteractions": false,
-    "suite": false,
     "fixture": false,
     "flush": false,
-    "setup": false,
-    "stub": false,
-    "teardown": false,
-    "sinon": false,
     "WCT": false,
-    "replace": false,
     "hljs": false,
     "beforeEach": false
   }
