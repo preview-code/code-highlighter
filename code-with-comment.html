@@ -1,0 +1,43 @@
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="code-highlighter.html">
+
+
+<dom-module id="code-with-comment">
+  <template>
+
+    <style>
+      :host {
+        display: block
+      }
+    </style>
+
+    <code-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true" index="[[indexItem]]"></code-highlighter>
+    <div> This is a comment diff </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'code-with-comment',
+      properties: {
+        code: {
+          type: String,
+          notify: true
+        },
+        beforeStart: {
+          type: Number,
+          notify: true
+        },
+        afterStart: {
+          type: Number,
+          notify: true
+        },
+        indexItem: Number
+      }
+    });
+  </script>
+</dom-module>

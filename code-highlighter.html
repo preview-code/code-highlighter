@@ -1,0 +1,270 @@
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="highlight-import.html">
+<link rel="import" href="highlight-styles.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+
+<!--
+Syntax highlighting for textual diffs.
+
+@demo demo/index.html
+-->
+<dom-module id="code-highlighter">
+  <template>
+
+    <style include="highlight-styles">
+      :host {
+        display: flex;
+        font-family: monospace;
+      }
+      
+      #beforeColumn,
+      #afterColumn {
+        @apply(--line-number-columns);
+      }
+      
+      #iconColumn {
+        width: 0em;
+      }
+      
+      #beforeColumn > span,
+      #afterColumn > span {
+        padding: 0 4px;
+        @apply(--line-numbers);
+        display: block;
+        text-align: center;
+      }
+      
+      iron-icon {
+        display: block;
+        opacity: 0;
+        z-index: 1;
+        @apply(--line-icon-button)
+      }
+      
+      #codeColumn {
+        overflow-x: auto;
+        width: 100%;
+        position: relative;
+      }
+      
+      span {
+        line-height: var(--line-height, 24px);
+        height: var(--line-height, 24px);
+      }
+      
+      pre {
+        overflow-x: auto;
+        line-height: var(--line-height, 24px);
+        margin: 0;
+      }
+      
+      #diffColors {
+        width: 100%;
+        position: absolute;
+        top: 0;
+        pointer-events: none;
+        z-index: 0;
+        right: 0;
+        opacity: 0.2;
+      }
+      
+      #diffColors div {
+        height: var(--line-height, 24px);
+      }
+      
+      #diffColors .add {
+        background-color: var(--add-color, green);
+      }
+      
+      #diffColors .del {
+        background-color: var(--del-color, red);
+      }
+      
+      .empty {
+        visibility: hidden;
+      }
+    </style>
+
+    <div id="beforeColumn"></div>
+    <div id="afterColumn"></div>
+    <div id="iconColumn" on-tap="_splitHunk" hidden$="[[!canSplit]]"></div>
+    <div id="codeColumn">
+      <pre><code id="code"></code></pre>
+      <div id="diffColors"></div>
+    </div>
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'code-highlighter',
+      observers: [
+        '_onDiffChange(code, beforeStart, afterStart)'
+      ],
+
+      properties: {
+        code: {
+          type: String,
+          notify: true
+        },
+        language: {
+          type: String,
+          reflectToAttribute: true,
+          notify: true
+        },
+        beforeStart: {
+          type: Number,
+          notify: true
+        },
+        afterStart: {
+          type: Number,
+          notify: true
+        },
+        _amountLines: Number,
+        canSplit: {
+          type: Boolean,
+          value: false
+        },
+        index: Number
+      },
+      attached: function () {
+        this._onMouseHover = this._onMouseHover.bind(this);
+
+        this.$.beforeColumn.addEventListener('mouseover', this._onMouseHover);
+        this.$.beforeColumn.addEventListener('mouseout', this._onMouseHover);
+        this.$.afterColumn.addEventListener('mouseover', this._onMouseHover);
+        this.$.afterColumn.addEventListener('mouseout', this._onMouseHover);
+        this.$.iconColumn.addEventListener('mouseover', this._onMouseHover);
+        this.$.iconColumn.addEventListener('mouseout', this._onMouseHover);
+      },
+      detached: function () {
+
+        this.$.beforeColumn.removeEventListener('mouseover', this._onMouseHover);
+        this.$.beforeColumn.removeEventListener('mouseout', this._onMouseHover);
+        this.$.afterColumn.removeEventListener('mouseover', this._onMouseHover);
+        this.$.afterColumn.removeEventListener('mouseout', this._onMouseHover);
+        this.$.iconColumn.removeEventListener('mouseover', this._onMouseHover);
+        this.$.iconColumn.removeEventListener('mouseout', this._onMouseHover);
+      },
+
+      _onDiffChange: function (code, beforeStart, afterStart) {
+        var lines = code.split('\n');
+
+        // The last line may be empty.
+        if (code.charAt(code.length - 1) === '\n') {
+          lines.pop();
+        }
+
+        var before = beforeStart;
+        var after = afterStart;
+
+        var createSpan = function (content, index, other) {
+          if (content !== '') {
+            return '<span class="linenumber" index="' + index + '">' + content + '</span>';
+          }
+          return '<span class="empty" index="' + index + '">' + other + '</span>';
+        }
+
+        var createIcon = function (index, before, after) {
+          return '<iron-icon icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after + '></iron-icon>';
+        }
+
+        var beforeContent = '';
+        var afterContent = '';
+        var iconContent = '';
+        var strippedCode = [];
+        var diffMarks = [];
+        lines.forEach(function (line, index) {
+          beforeContent += createSpan(line.startsWith('+') ? '' : before++, index, after);
+          afterContent += createSpan(line.startsWith('-') ? '' : after++, index, before);
+          iconContent += createIcon(index, before, after);
+          strippedCode.push(line.substring(1));
+          diffMarks.push(line.charAt(0));
+        });
+
+        this._amountLines = lines.length;
+
+        strippedCode = strippedCode.reduce(function (acc, line) {
+          return acc + '\n' + line;
+        });
+
+        Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
+        Polymer.dom(this.$.afterColumn).innerHTML = afterContent;
+
+        Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
+
+        var h = hljs.highlightAuto(strippedCode);
+        Polymer.dom(this.$.code).innerHTML = h.value;
+        this.language = h.language;
+        this._updateDiffLines(diffMarks);
+      },
+
+      _updateDiffLines: function (marks) {
+
+        var createDiv = function (cls) {
+          return '<div class="' + cls + '"></div>';
+        }
+
+        var markClass = function (mark) {
+          return mark === '+' ? 'add' : mark === '-' ? 'del' : 'normal';
+        }
+
+        var content = ''
+        marks.forEach(function (mark) {
+          content += createDiv(markClass(mark));
+        });
+        Polymer.dom(this.$.diffColors).innerHTML = content;
+      },
+
+      _splitHunk: function (e) {
+        var path = this._getComposedPath(e)[0];
+        var lineNumber = Number(path.getAttribute('index')) + 1;
+        if (path.localName === 'iron-icon' && lineNumber !== this._amountLines) {
+          var newElem = {};
+          var x = this.code.split('\n');
+          newElem.code = x.slice(lineNumber, this.code.length - 1).join('\n');
+          newElem.beforeStart = path.getAttribute('before');
+          newElem.afterStart = path.getAttribute('after');
+          newElem.index = this.index;
+          this.code = x.slice(0, lineNumber).join('\n');
+          this.fire('add-hunk', newElem);
+        }
+      },
+
+      // For browsers that support neither Event.path and Event.composedPath.
+      // from: https://stackoverflow.com/questions/36845515/mouseevent-path-equivalent-in-firefox-safari
+      _getComposedPath: function (e) {
+        var path = e.path || (e.composedPath && e.composedPath()) || [];
+        if (path.length === 0) {
+          var currentElem = e.target;
+          while (currentElem) {
+            path.push(currentElem);
+            currentElem = currentElem.parentElement;
+          }
+          if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
+            path.push(document);
+          if (path.indexOf(window) === -1)
+            path.push(window);
+        }
+        return path;
+      },
+
+      _onMouseHover: function (e) {
+        var path = this._getComposedPath(e)[0];
+        var index = path.getAttribute('index');
+        if (path.localName === 'iron-icon') {
+          path.style.opacity = e.type === 'mouseover' ? 1 : 0;
+        } else if (index) {
+          var icon = Polymer.dom(this.$.iconColumn).querySelectorAll('iron-icon')[index];
+          icon.style.opacity = e.type === 'mouseover' ? 1 : 0;
+        }
+      }
+    });
+  </script>
+</dom-module>

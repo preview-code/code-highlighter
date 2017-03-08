@@ -1,0 +1,46 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>hunk-element tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../hunk-element.html">
+</head>
+
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <hunk-element>
+      </hunk-element>
+    </template>
+  </test-fixture>
+  <script>
+    describe('<hunk-element>', function () {
+      var elem;
+      beforeEach(function () {
+        elem = fixture('basic');
+        var hunk = {};
+        elem.hunks = [hunk]
+      });
+
+      it('calling method adds hunk', function () {
+        elem.fire('add-hunk', {code: 'second line', beforeStart: 1, afterStart: 1, index: 1})
+        assert.equal(elem.hunks.length, 2);
+        assert.deepEqual(elem.hunks[1], {code: 'second line', beforeStart: 1, afterStart: 1});
+      });
+    });
+  </script>
+</body>
+
+</html>
