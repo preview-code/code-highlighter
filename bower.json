@@ -1,5 +1,5 @@
 {
-  "name": "diff-highlighter",
+  "name": "code-highlighter",
   "version": "0.0.1",
   "description": "Syntax highlighting for textual diffs",
   "authors": [
@@ -7,10 +7,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/preview-code/diff-highlighter.git"
+    "url": "git://github.com/preview-code/code-highlighter.git"
   },
-  "homepage": "https://github.com/preview-code/diff-highlighter",
-  "main": "diff-highlighter.html",
+  "homepage": "https://github.com/preview-code/code-highlighter",
+  "main": "code-highlighter.html",
   "license": "BSD-3-Clause",
   "private": true,
   "ignore": [
