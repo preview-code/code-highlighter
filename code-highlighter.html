@@ -28,7 +28,7 @@ Syntax highlighting for textual diffs.
       }
 
       #iconColumn {
-        width: 0em;
+        width: 24px;
       }
 
       #beforeColumn > span,
@@ -70,19 +70,18 @@ Syntax highlighting for textual diffs.
         pointer-events: none;
         z-index: 0;
         right: 0;
-        opacity: 0.2;
       }
 
       #diffColors div {
         height: var(--line-height, 24px);
       }
 
-      #diffColors .add {
-        background-color: var(--add-color, green);
+      #diffColors .add, .icon-add{
+        background-color: var(--add-color, rgba(0,128, 0, 0.2));
       }
 
-      #diffColors .del {
-        background-color: var(--del-color, red);
+      #diffColors .del, .icon-del {
+        background-color: var(--del-color, rgba(255,0, 0, 0.2));
       }
 
       .empty {
@@ -163,6 +162,8 @@ Syntax highlighting for textual diffs.
         var before = beforeStart;
         var after = afterStart;
 
+        var markClass = this._markClass;
+
         var createSpan = function (content, index, other) {
           if (content !== '') {
             return '<span class="linenumber" index="' + index + '">' + content + '</span>';
@@ -170,8 +171,8 @@ Syntax highlighting for textual diffs.
           return '<span class="empty" index="' + index + '">' + other + '</span>';
         }
 
-        var createIcon = function (index, before, after) {
-          return '<iron-icon icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after + '></iron-icon>';
+        var createIcon = function (index, before, after, mark) {
+          return '<div class=icon-' + markClass(mark) + '><iron-icon icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after + '></iron-icon></div>';
         }
 
         var beforeContent = '';
@@ -179,15 +180,18 @@ Syntax highlighting for textual diffs.
         var iconContent = '';
         var strippedCode = [];
         var diffMarks = [];
+        var amountLines = 0;
         lines.forEach(function (line, index) {
-          beforeContent += createSpan(line.startsWith('+') ? '' : before++, index, after);
-          afterContent += createSpan(line.startsWith('-') ? '' : after++, index, before);
-          iconContent += createIcon(index, before, after);
-          strippedCode.push(line.substring(1));
-          diffMarks.push(line.charAt(0));
+          if (!line.startsWith('\\')) {
+            beforeContent += createSpan(line.startsWith('+') ? '' : before++, index, after);
+            afterContent += createSpan(line.startsWith('-') ? '' : after++, index, before);
+            iconContent += createIcon(index, before, after, line.charAt(0));
+            strippedCode.push(line.substring(1));
+            diffMarks.push(line.charAt(0));
+            amountLines++;
+          }
         });
-
-        this._amountLines = lines.length;
+        this._amountLines = amountLines;
 
         strippedCode = strippedCode.reduce(function (acc, line) {
           return acc + '\n' + line;
@@ -210,9 +214,7 @@ Syntax highlighting for textual diffs.
           return '<div class="' + cls + '"></div>';
         }
 
-        var markClass = function (mark) {
-          return mark === '+' ? 'add' : mark === '-' ? 'del' : 'normal';
-        }
+        var markClass = this._markClass;
 
         var content = ''
         marks.forEach(function (mark) {
@@ -231,6 +233,10 @@ Syntax highlighting for textual diffs.
           lineInfo.lines = this._amountLines;
         }
         this.fire('click-line', lineInfo);
+      },
+
+      _markClass: function (mark) {
+        return mark === '+' ? 'add' : mark === '-' ? 'del' : 'normal';
       },
 
       _onMouseHover: function (e) {
