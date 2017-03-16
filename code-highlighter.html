@@ -58,6 +58,7 @@ Syntax highlighting for textual diffs.
       }
 
       pre {
+        position: relative;
         overflow-x: auto;
         line-height: var(--line-height, 24px);
         margin: 0;
@@ -93,8 +94,8 @@ Syntax highlighting for textual diffs.
     <div id="afterColumn"></div>
     <div id="iconColumn" on-tap="_splitHunk" hidden$="[[!canSplit]]"></div>
     <div id="codeColumn">
-      <pre><code id="code"></code></pre>
       <div id="diffColors"></div>
+      <pre><code id="code"></code></pre>
     </div>
 
 
