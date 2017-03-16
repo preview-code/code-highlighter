@@ -21,16 +21,16 @@ Syntax highlighting for textual diffs.
         display: flex;
         font-family: monospace;
       }
-      
+
       #beforeColumn,
       #afterColumn {
         @apply(--line-number-columns);
       }
-      
+
       #iconColumn {
         width: 0em;
       }
-      
+
       #beforeColumn > span,
       #afterColumn > span {
         padding: 0 4px;
@@ -38,31 +38,31 @@ Syntax highlighting for textual diffs.
         display: block;
         text-align: center;
       }
-      
+
       iron-icon {
         display: block;
         opacity: 0;
         z-index: 1;
         @apply(--line-icon-button)
       }
-      
+
       #codeColumn {
         overflow-x: auto;
         width: 100%;
         position: relative;
       }
-      
+
       span {
         line-height: var(--line-height, 24px);
         height: var(--line-height, 24px);
       }
-      
+
       pre {
         overflow-x: auto;
         line-height: var(--line-height, 24px);
         margin: 0;
       }
-      
+
       #diffColors {
         width: 100%;
         position: absolute;
@@ -72,19 +72,19 @@ Syntax highlighting for textual diffs.
         right: 0;
         opacity: 0.2;
       }
-      
+
       #diffColors div {
         height: var(--line-height, 24px);
       }
-      
+
       #diffColors .add {
         background-color: var(--add-color, green);
       }
-      
+
       #diffColors .del {
         background-color: var(--del-color, red);
       }
-      
+
       .empty {
         visibility: hidden;
       }
@@ -130,8 +130,7 @@ Syntax highlighting for textual diffs.
         canSplit: {
           type: Boolean,
           value: false
-        },
-        index: Number
+        }
       },
       attached: function () {
         this._onMouseHover = this._onMouseHover.bind(this);
@@ -223,40 +222,19 @@ Syntax highlighting for textual diffs.
       },
 
       _splitHunk: function (e) {
-        var path = this._getComposedPath(e)[0];
-        var lineNumber = Number(path.getAttribute('index')) + 1;
-        if (path.localName === 'iron-icon' && lineNumber !== this._amountLines) {
-          var newElem = {};
-          var x = this.code.split('\n');
-          newElem.code = x.slice(lineNumber, this.code.length - 1).join('\n');
-          newElem.beforeStart = path.getAttribute('before');
-          newElem.afterStart = path.getAttribute('after');
-          newElem.index = this.index;
-          this.code = x.slice(0, lineNumber).join('\n');
-          this.fire('add-hunk', newElem);
+        var path = e.target;
+        if (path.localName === 'iron-icon') {
+          var lineInfo = {};
+          lineInfo.beforeStart = path.getAttribute('before');
+          lineInfo.afterStart = path.getAttribute('after');
+          lineInfo.lineNumber = Number(path.getAttribute('index')) + 1;
+          lineInfo.lines = this._amountLines;
         }
-      },
-
-      // For browsers that support neither Event.path and Event.composedPath.
-      // from: https://stackoverflow.com/questions/36845515/mouseevent-path-equivalent-in-firefox-safari
-      _getComposedPath: function (e) {
-        var path = e.path || (e.composedPath && e.composedPath()) || [];
-        if (path.length === 0) {
-          var currentElem = e.target;
-          while (currentElem) {
-            path.push(currentElem);
-            currentElem = currentElem.parentElement;
-          }
-          if (path.indexOf(window) === -1 && path.indexOf(document) === -1)
-            path.push(document);
-          if (path.indexOf(window) === -1)
-            path.push(window);
-        }
-        return path;
+        this.fire('click-line', lineInfo);
       },
 
       _onMouseHover: function (e) {
-        var path = this._getComposedPath(e)[0];
+        var path = e.target;
         var index = path.getAttribute('index');
         if (path.localName === 'iron-icon') {
           path.style.opacity = e.type === 'mouseover' ? 1 : 0;

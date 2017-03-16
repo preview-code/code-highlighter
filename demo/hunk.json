@@ -1,14 +1,16 @@
-[{
-  "diff": "\n         // and this class uses a mixin which is also evaluated dynamically,\n         // we need to manually trigger updating the styles.\n         'updateStyles(pullRequest.state)',\n-        '_updateDescription(shouldSend)'\n+        '_updateDescription(shouldSend)',\n+        '_hideCI(CIstatus)'\n       ],\n       _fireAjax: function(pullRequest) {\n         if (pullRequest) {\n           this.$.ajaxIssue.generateRequest();\n+          this.statusURL = pullRequest._links.statuses.href.replace('statuses', 'status')\n+          this.$.ajaxCI.generateRequest();\n         }\n       },\n       _mergePR: function() {",
-
-  "diff_id": "@@ -154,11 +190,14 @@",
-  "before_start": 154,
-  "after_start": 190
-},
-{
-  "diff": "        display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;",
-  "diff_id": "@@ -154,11 +190,14 @@",
-  "before_start": 154,
-  "after_start": 190
-}
+[
+  {
+    "diff": "\n         // and this class uses a mixin which is also evaluated dynamically,\n         // we need to manually trigger updating the styles.\n         'updateStyles(pullRequest.state)',\n-        '_updateDescription(shouldSend)'\n+        '_updateDescription(shouldSend)',\n+        '_hideCI(CIstatus)'\n       ],\n       _fireAjax: function(pullRequest) {\n         if (pullRequest) {\n           this.$.ajaxIssue.generateRequest();\n+          this.statusURL = pullRequest._links.statuses.href.replace('statuses', 'status')\n+          this.$.ajaxCI.generateRequest();\n         }\n       },\n       _mergePR: function() {",
+    "diff_id": "@@ -154,11 +190,14 @@",
+    "before_start": 154,
+    "after_start": 190,
+    "comments": []
+  },
+  {
+    "diff": "        display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;",
+    "diff_id": "@@ -154,11 +190,14 @@",
+    "before_start": 154,
+    "after_start": 190,
+    "comments": []
+  }
 ]

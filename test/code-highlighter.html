@@ -38,61 +38,32 @@ This code may only be used under the BSD style license found in LICENSE.txt
         elem.afterStart = 1;
         elem.canSplit = true;
         elem.index = 0;
+        elem._amountLines = 2;
       });
 
-      it('tap button fires event', function () {
-        elem.addEventListener('add-hunk', function (e) {
+      it('tap button fires event', function (done) {
+        elem.addEventListener('click-line', function (e) {
           assert.equal(e.detail.beforeStart, elem.beforeStart + 1)
           assert.equal(e.detail.afterStart, elem.afterStart + 1)
-          assert.equal(e.detail.code, ' second line \n');
-          assert.equal(e.detail.index, elem.index);
+          assert.equal(e.detail.lineNumber, 1);
+          assert.equal(e.detail.lines, elem._amountLines);
+          done();
         });
         var icon = Polymer.dom(elem.root).querySelector('iron-icon');
         MockInteractions.tap(icon);
       });
 
-      it('calling method fires event', function () {
-        elem.addEventListener('add-hunk', function (e) {
-          assert.equal(e.detail.beforeStart, 0)
-          assert.equal(e.detail.afterStart, 1)
-          assert.equal(e.detail.code, ' second line \n');
-          assert.equal(e.detail.index, 1);
-        });
-        elem.fire('add-hunk', {beforeStart: 0, afterStart: 1, code: ' second line \n', index: 1});
-      });
-
-      it('code is splitted correct', function () {
-        elem.addEventListener('add-hunk', function (e) {
-          assert.equal(e.detail.code, ' second line \n');
-        });
-        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
-        MockInteractions.tap(icon);
-        assert.equal(elem.code, 'first line ');
-      });
-
-      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].forEach(function (count) {
+      for (var count = 0; count < 14; count++) {
         it('tapping all buttons, fires events', function (done) {
           elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
-          elem.addEventListener('add-hunk', function (e) {
-            assert.equal(e.detail.index, elem.index);
+          elem.addEventListener('click-line', function (e) {
+            assert.equal(e.detail.lineNumber, count + 1);
             done();
           });
           var icons = Polymer.dom(elem.root).querySelectorAll('iron-icon');
           MockInteractions.tap(icons[count]);
         });
-      });
-
-      it('tapping on last line should not fire', function (done) {
-        elem.code = 'one liner \n'
-        var icon = Polymer.dom(elem.root).querySelector('iron-icon');
-        flush(function () {
-          elem.addEventListener('add-hunk', function () {
-            done(new Error('This event should not have been fired'));
-          });
-        });
-        MockInteractions.tap(icon);
-        setTimeout(done, 10);
-      });
+      }
 
       it('mouseover should show icon', function (done) {
         var icon = Polymer.dom(elem.root).querySelector('iron-icon');

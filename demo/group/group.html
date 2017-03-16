@@ -5,6 +5,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
 -->
 <link rel="import" href="../../../polymer/polymer.html">
 <link rel="import" href="../../../iron-list/iron-list.html">
+<link rel="import" href="../../../iron-icons/iron-icons.html">
 <link rel="import" href="../../hunk-element.html">
 <dom-module id="group-demo">
   <template>
@@ -12,18 +13,20 @@ This code may only be used under the BSD style license found in LICENSE.txt
       :host {
         display: block;
       }
-      
+
       paper-material {
         background: white;
         margin: 1em;
       }
     </style>
 
+    <iron-icon icon="icons:arrow-downward" on-tap="_hideComments"></iron-icon>
+
     <iron-list items="[[diffs]]" as="diff">
       <template>
         <div>
           <paper-material elevation="1">
-            <hunk-element hunks=[[diff]]></hunk-element>
+            <hunk-element hunks=[[diff]] hide-comments="[[hideComments]]"></hunk-element>
           </paper-material>
         </div>
       </template>
@@ -34,10 +37,15 @@ This code may only be used under the BSD style license found in LICENSE.txt
     Polymer({
       is: 'group-demo',
       properties: {
-        diffs: Array
+        diffs: Array,
+        hideComments: {
+          type: Boolean,
+          value: false
+        }
       },
       listeners: {
-        'add-hunk': '_resize'
+        'add-chunk-with-comment': '_resize',
+        'toggle-add-comment': '_resize'
       },
       created: function () {
         fetch('../hunk.json')
@@ -49,13 +57,18 @@ This code may only be used under the BSD style license found in LICENSE.txt
                 'code': x.diff,
                 'diffId': x.diff_id,
                 'beforeStart': x.before_start,
-                'afterStart': x.after_start
+                'afterStart': x.after_start,
+                'comments': x.comments
               }];
             }.bind(this));
           }.bind(this));
       },
       _resize: function () {
         Polymer.dom(this.root).querySelector('iron-list').fire('iron-resize');
+      },
+      _hideComments: function() {
+        this.hideComments = !this.hideComments;
+        this._resize();
       }
     });
   </script>

@@ -1,0 +1,50 @@
+<!doctype html>
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>comment-container tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+
+  <link rel="import" href="../comment-container.html">
+</head>
+
+<body>
+
+  <test-fixture id="basic">
+    <template>
+      <comment-container>
+      </comment-container>
+    </template>
+  </test-fixture>
+  <script>
+    describe('<comment-container>', function () {
+      var elem;
+      beforeEach(function () {
+        elem = fixture('basic');
+        elem.comments = [];
+        elem.hideAdd = false;
+      });
+
+      it('hideAdd only hides add element', function () {
+        var add = Polymer.dom(elem.root).querySelector('add-comment');
+        var list = Polymer.dom(elem.root).querySelector('comment-list');
+        assert.equal(add.hidden, false);
+        assert.equal(list.hidden, false);
+        elem.hideAdd = true;
+        assert.equal(add.hidden, true);
+        assert.equal(list.hidden, false);
+      });
+    });
+  </script>
+</body>
+
+</html>

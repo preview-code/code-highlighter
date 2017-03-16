@@ -1,0 +1,53 @@
+<!--
+@license
+Copyright (c) 2017 Preview-Code. All rights reserved.
+This code may only be used under the BSD style license found in LICENSE.txt
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-input/paper-textarea.html">
+<link rel="import" href="../paper-button/paper-button.html">
+
+<dom-module id="add-comment">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <paper-textarea value="{{comment}}" label="Leave a comment."></paper-textarea>
+    <paper-button id="add" on-tap="_addComment">Add comment</paper-button>
+    <paper-button id="cancel" on-tap="_hide">Cancel</paper-button>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'add-comment',
+      properties: {
+        comment: String,
+        comments: {
+          type: Array,
+          notify: true
+        },
+        hidden: {
+          type: Boolean,
+          notify: true,
+          reflectToAttribute: true
+        }
+      },
+      _addComment: function () {
+        if (this.comment.replace(/\s/g, '') !== '') {
+          this.push('comments', this.comment);
+          this.fire('toggle-add-comment');
+          this.comment = '';
+          this.hidden = true;
+        }
+      },
+
+      _hide: function () {
+        this.comment = '';
+        this.fire('toggle-add-comment');
+        this.hidden = true;
+      }
+    });
+  </script>
+</dom-module>
