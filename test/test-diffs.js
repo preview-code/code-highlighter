@@ -230,6 +230,16 @@ var actualDiffs = [
     '-Integer non turpis eu quam bibendum pulvinar vel non ante.\n' +
     '-Etiam vel nibh aliquam, dignissim nunc vel, ultrices sapien.\n' +
     '-Nulla ac justo non tellus convallis suscipit.'
+  },
+  {
+    file: 17,
+    expected: [17],
+    diff: 'diff --git a/a /dev/null\n' +
+    'index 3703df4..0000000\n'+
+    '--- a/a' +
+    '+++ /dev/null' +
+    '@@ -1 +0,0 @@' +
+    '-/opt/ros/indigo/share/catkin/cmake/toplevel.cmake \n\ No newline at end of file'
   }
 ]
 
@@ -433,12 +443,21 @@ var testDiffs = [
     '-Nulla ac justo non tellus convallis suscipit.',
     linesChanged: { startLineBefore: 341, rangeBefore: 5,
       startLineAfter: 343,  rangeAfter: 3 }
+  },
+  {
+    index: '17',
+    file: {name: 'removelastline'},
+    diff_id: "@@ -1 +0,0 @@",
+    fileNameUrl: 'removelastline',
+    changes: '-/opt/ros/indigo/share/catkin/cmake/toplevel.cmake \n\\ No newline at end of file',
+    linesChanged: { startLineBefore: 1, rangeBefore: 1,
+      startLineAfter: 0,  rangeAfter: 0 }
   }
 ];
 
 var testDiffsWithDelete = testDiffs.slice();
 testDiffsWithDelete.push({
-  index: '17',
+  index: '18',
   file: {name: 'a', deleted: true},
   diffId: '@@ -341,5 +343,3 @@',
   fileNameUrl: 'a',

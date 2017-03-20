@@ -23,7 +23,10 @@ This code may only be used under the BSD style license found in LICENSE.txt
     Polymer({
       is: 'add-comment',
       properties: {
-        comment: String,
+        comment: {
+          type: String,
+          value: ''
+        },
         comments: {
           type: Array,
           notify: true
