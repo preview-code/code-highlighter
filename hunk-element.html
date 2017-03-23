@@ -26,7 +26,7 @@ Syntax highlighting for textual diffs.
 
     <template is="dom-repeat" items="{{hunks}}">
       <code-with-comment code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}" comments="{{item.comments}}"
-        index-item="[[index]]" hide-comments="[[hideComments]]"></code-with-comment>
+        index-item="[[index]]" hide-comments="[[hideComments]]" start-line="{{item.startLine}}"></code-with-comment>
     </template>
 
   </template>
@@ -49,7 +49,7 @@ Syntax highlighting for textual diffs.
       },
       _addHunk: function (e) {
         var newHunk = e.detail;
-        this.splice('hunks', newHunk.index + 1, 0, {code: newHunk.code, beforeStart: newHunk.beforeStart, afterStart: newHunk.afterStart, comments: newHunk.comments});
+        this.splice('hunks', newHunk.index + 1, 0, {code: newHunk.code, beforeStart: newHunk.beforeStart, afterStart: newHunk.afterStart, comments: newHunk.comments, startLine: newHunk.startLine});
       }
     })
   </script>

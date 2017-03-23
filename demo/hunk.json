@@ -4,22 +4,23 @@
     "diff_id": "@@ -154,11 +190,14 @@",
     "before_start": 154,
     "after_start": 190,
-    "comments": []
+    "comments": [],
+    "startLine": 1
   },
   {
     "diff": "        display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;",
     "diff_id": "@@ -154,11 +190,14 @@",
     "before_start": 154,
     "after_start": 190,
-    "comments": []
+    "comments": [],
+    "startLine": 1
   },
   {
-  "diff":"-/opt/ros/indigo/share/catkin/cmake/toplevel.cmake \n\\ No newline at end of file",
-  "diff_id": "@@ -1 +0,0 @@",
-  "before_start": 1,
-  "after_start": 0,
-  "comments": []
+    "diff": "-/opt/ros/indigo/share/catkin/cmake/toplevel.cmake \n\\ No newline at end of file",
+    "diff_id": "@@ -1 +0,0 @@",
+    "before_start": 1,
+    "after_start": 0,
+    "comments": [],
+    "startLine": 1
   }
-
-
 ]

@@ -4,8 +4,9 @@ Copyright (c) 2017 Preview-Code. All rights reserved.
 This code may only be used under the BSD style license found in LICENSE.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../comments/add-comment.html">
+<link rel="import" href="../comments/comment-list.html">
 <link rel="import" href="code-highlighter.html">
-<link rel="import" href="comment-container.html">
 
 
 <dom-module id="code-with-comment">
@@ -22,7 +23,8 @@ This code may only be used under the BSD style license found in LICENSE.txt
     </style>
 
     <code-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
-    <comment-container hidden="[[hideComments]]" hide-add="{{hideAddComments}}" comments="{{comments}}"></comment-container>
+    <comment-list list="[[comments]]"></comment-list>
+    <add-comment on-add-comment="addComment" hidden="{{hideAddComments}}" project="[[project]]" line-comment="true"></add-comment>
   </template>
 
   <script>
@@ -53,22 +55,37 @@ This code may only be used under the BSD style license found in LICENSE.txt
           type: Boolean,
           value: false
         },
+        startLine: Number,
         comments: Array
       },
+
       _splitCode: function (e) {
         this.hideAddComments = false;
         e.stopPropagation();
 
         var newHunk = e.detail;
         if (newHunk.lineNumber !== newHunk.lines) {
+          this.lineNumber = newHunk.lineNumber;
           newHunk.comments = this.comments;
           newHunk.index = this.indexItem;
+          newHunk.startLine = this.startLine;
+          this.startLine = this.startLine + newHunk.lineNumber;
           this.comments = [];
           var x = this.code.split('\n');
           newHunk.code = x.slice(newHunk.lineNumber, this.code.length - 1).join('\n');
           this.code = x.slice(0, newHunk.lineNumber).join('\n');
           this.fire('add-chunk-with-comment', newHunk);
         }
+      },
+
+      addComment: function (e) {
+        var newComment = {};
+        newComment.comment = e.detail;
+        newComment.hunkIndex = this.indexItem;
+        newComment.lineNumber = this.startLine;
+        e.stopPropagation();
+
+        this.fire('add-comment', newComment);
       }
     });
   </script>
