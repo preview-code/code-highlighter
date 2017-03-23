@@ -24,7 +24,7 @@ Syntax highlighting for textual diffs.
       }
     </style>
 
-    <template is="dom-repeat" items="{{hunks}}">
+    <template is="dom-repeat" items="{{chunks}}">
       <code-with-comment code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}" comments="{{item.comments}}"
         index-item="[[index]]" hide-comments="[[hideComments]]" start-line="{{item.startLine}}"></code-with-comment>
     </template>
@@ -35,22 +35,114 @@ Syntax highlighting for textual diffs.
     Polymer({
       is: 'hunk-element',
 
+      observers: ['_getChunks(hunk)'],
       listeners: {
         'add-chunk-with-comment': '_addHunk'
       },
       properties: {
-        hunks: {
+        hunk: Object,
+        hideComments: Boolean,
+        chunks: {
           type: Array,
-          value: function () {
-            return [];
-          }
-        },
-        hideComments: Boolean
+        }
       },
       _addHunk: function (e) {
         var newHunk = e.detail;
-        this.splice('hunks', newHunk.index + 1, 0, {code: newHunk.code, beforeStart: newHunk.beforeStart, afterStart: newHunk.afterStart, comments: newHunk.comments, startLine: newHunk.startLine});
+        this._addChunk(newHunk);
+      },
+
+      _addChunk: function (newChunk) {
+        if (this.chunks && this.chunks.length > 0) {
+          this.splice('chunks', newChunk.index, 0, { code: newChunk.code, beforeStart: newChunk.beforeStart, afterStart: newChunk.afterStart, comments: newChunk.comments, startLine: newChunk.startLine });
+        }
+        else {
+          this.chunks = [newChunk];
+        }
+      },
+
+      _getChunks: function (hunk) {
+
+        if (hunk.comments.length === 0) {
+          this.chunks = [hunk];
+          return;
+        }
+
+        var makeChunk = function (comments, index) {
+          var newChunk = {};
+          newChunk.comments = comments;
+          newChunk.beforeStart = beforeStart;
+          newChunk.afterStart = afterStart;
+          newChunk.startLine = index + startLine;
+          newChunk.index = hunkIndex;
+          newChunk.code = code.slice(oldChunk, index).join('\n');
+          this._addChunk(newChunk)
+          hunkIndex++;
+          this.fire('iron-resize');
+        }.bind(this);
+
+        var compare = function (a, b) {
+          if (a.position < b.position)
+            return -1;
+          if (a.position > b.position)
+            return 1;
+          if(a.created_at > b.created_at)
+            return 1;
+          return 0;
+        }
+
+        hunk.comments.sort(compare);
+
+        var code = hunk.code.split('\n');
+
+        //Filter all comments that should be on a previous hunk
+        for (var index = 0; index < hunk.comments.length; index++) {
+          if (hunk.comments.position < startLine) {
+            hunk.comments.splice(index, 1);
+          }
+          else {
+            break;
+          }
+        }
+
+        var nextPos = hunk.comments[0].position;
+        var beforeStart = hunk.beforeStart;
+        var afterStart = hunk.afterStart;
+        var newBeforeStart = hunk.beforeStart;
+        var newAfterStart = hunk.afterStart;
+        var startLine = hunk.startLine;
+        var hunkIndex = 0;
+        var oldChunk = 0;
+        code.forEach(function (line, index) {
+          line.startsWith('+') ? '' : newBeforeStart++;
+          line.startsWith('-') ? '' : newAfterStart++;
+          var call = false;
+          var newChunk = {};
+          var comments = [];
+          while (index + startLine === nextPos) {
+            call = true;
+            comments.push(hunk.comments[0]);
+            hunk.comments.shift();
+            if (hunk.comments[0]) {
+              nextPos = hunk.comments[0].position;
+            }
+            else {
+              break;
+            }
+          }
+          if (call) {
+            makeChunk(comments, index + 1);
+            beforeStart = newBeforeStart;
+            afterStart = newAfterStart;
+            oldChunk = index + 1;
+            if (hunk.comments.length === 0) {
+              return;
+            }
+          }
+        });
+
+        makeChunk([], code.length);
       }
+
     })
   </script>
 </dom-module>

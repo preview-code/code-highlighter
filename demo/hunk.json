@@ -1,10 +1,37 @@
 [
   {
-    "diff": "\n         // and this class uses a mixin which is also evaluated dynamically,\n         // we need to manually trigger updating the styles.\n         'updateStyles(pullRequest.state)',\n-        '_updateDescription(shouldSend)'\n+        '_updateDescription(shouldSend)',\n+        '_hideCI(CIstatus)'\n       ],\n       _fireAjax: function(pullRequest) {\n         if (pullRequest) {\n           this.$.ajaxIssue.generateRequest();\n+          this.statusURL = pullRequest._links.statuses.href.replace('statuses', 'status')\n+          this.$.ajaxCI.generateRequest();\n         }\n       },\n       _mergePR: function() {",
+    "diff": " // and this class uses a mixin which is also evaluated dynamically,\n         // we need to manually trigger updating the styles.\n         'updateStyles(pullRequest.state)',\n-        '_updateDescription(shouldSend)'\n+        '_updateDescription(shouldSend)',\n+        '_hideCI(CIstatus)'\n       ],\n       _fireAjax: function(pullRequest) {\n         if (pullRequest) {\n           this.$.ajaxIssue.generateRequest();\n+          this.statusURL = pullRequest._links.statuses.href.replace('statuses', 'status')\n+          this.$.ajaxCI.generateRequest();\n         }\n       },\n       _mergePR: function() {",
     "diff_id": "@@ -154,11 +190,14 @@",
     "before_start": 154,
     "after_start": 190,
-    "comments": [],
+    "comments": [
+      {
+        "comment": "hello",
+        "position":3,
+        "created_at":"2017-02-13T11:46:23Z",
+        "user": {
+          "login": "Eva",
+          "avatar_url": "https://avatars1.githubusercontent.com/u/5946438?v=3&s=460"
+        }
+      },
+      {
+        "comment": "third",
+        "position": 3,
+        "created_at": "2017-02-14T11:46:23Z",
+        "user": {
+          "login": "Eva",
+          "avatar_url": "https://avatars1.githubusercontent.com/u/5946438?v=3&s=460"
+        }
+      },
+      {
+        "comment": "should  be first",
+        "position": 1,
+        "user": {
+          "login": "Eva",
+          "avatar_url": "https://avatars1.githubusercontent.com/u/5946438?v=3&s=460"
+        }
+      }
+    ],
     "startLine": 1
   },
   {

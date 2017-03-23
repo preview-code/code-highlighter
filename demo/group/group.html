@@ -26,7 +26,9 @@ This code may only be used under the BSD style license found in LICENSE.txt
       <template>
         <div>
           <paper-material elevation="1">
-            <hunk-element hunks=[[diff]] hide-comments="[[hideComments]]"></hunk-element>
+            <template is="dom-repeat" items="{{diff}}" as="hunk">
+              <hunk-element hunk="[[hunk]]" hide-comments="[[hideComments]]"></hunk-element>
+            </template>
           </paper-material>
         </div>
       </template>

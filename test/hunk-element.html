@@ -30,15 +30,15 @@ This code may only be used under the BSD style license found in LICENSE.txt
       var elem;
       beforeEach(function () {
         elem = fixture('basic');
-        var hunk = {code: 'first line', beforeStart: 3, afterStart: 4, index: 0};
-        elem.hunks = [hunk]
+        var hunk = { code: 'first line', beforeStart: 3, afterStart: 4, index: 0 };
+        elem.chunks = [hunk]
       });
 
       it('firing adds hunk', function () {
-        elem.fire('add-chunk-with-comment', {code: 'second line', beforeStart: 1, afterStart: 1, index: 1, comments: []})
-        assert.equal(elem.hunks.length, 2);
-        assert.deepEqual(elem.hunks[0], {code: 'first line', beforeStart: 3, afterStart: 4, index: 0});
-        assert.deepEqual(elem.hunks[1], {code: 'second line', beforeStart: 1, afterStart: 1, comments: []});
+        elem.fire('add-chunk-with-comment', { code: 'second line', beforeStart: 1, afterStart: 1, index: 1, comments: [], startLine: 6 })
+        assert.equal(elem.chunks.length, 2);
+        assert.deepEqual(elem.chunks[0], { code: 'first line', beforeStart: 3, afterStart: 4, index: 0 });
+        assert.deepEqual(elem.chunks[1], { code: 'second line', beforeStart: 1, afterStart: 1, comments: [], startLine: 6 });
       });
     });
   </script>

@@ -67,7 +67,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         if (newHunk.lineNumber !== newHunk.lines) {
           this.lineNumber = newHunk.lineNumber;
           newHunk.comments = this.comments;
-          newHunk.index = this.indexItem;
+          newHunk.index = this.indexItem + 1;
           newHunk.startLine = this.startLine;
           this.startLine = this.startLine + newHunk.lineNumber;
           this.comments = [];
@@ -81,7 +81,6 @@ This code may only be used under the BSD style license found in LICENSE.txt
       addComment: function (e) {
         var newComment = {};
         newComment.comment = e.detail;
-        newComment.hunkIndex = this.indexItem;
         newComment.lineNumber = this.startLine;
         e.stopPropagation();
 
