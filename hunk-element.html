@@ -26,7 +26,7 @@ Syntax highlighting for textual diffs.
 
     <template is="dom-repeat" items="{{chunks}}">
       <code-with-comment code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}" comments="{{item.comments}}"
-        index-item="[[index]]" hide-comments="[[hideComments]]" start-line="{{item.startLine}}"></code-with-comment>
+        index-item="[[item.index]]" hide-comments="[[hideComments]]" start-line="{{item.startLine}}" user="[[user]]"></code-with-comment>
     </template>
 
   </template>
@@ -44,7 +44,8 @@ Syntax highlighting for textual diffs.
         hideComments: Boolean,
         chunks: {
           type: Array,
-        }
+        },
+        user: Object
       },
       _addHunk: function (e) {
         var newHunk = e.detail;
@@ -53,18 +54,13 @@ Syntax highlighting for textual diffs.
 
       _addChunk: function (newChunk) {
         if (this.chunks && this.chunks.length > 0) {
-          if (newChunk.index) {
-            this.splice('chunks', newChunk.index, 0, { code: newChunk.code, beforeStart: newChunk.beforeStart, afterStart: newChunk.afterStart, comments: newChunk.comments, startLine: newChunk.startLine });
-          } else {
-            this.push('chunks', newChunk)
-          }
-        }
-        else {
+          this.splice('chunks', newChunk.index, 0, {code: newChunk.code, beforeStart: newChunk.beforeStart, afterStart: newChunk.afterStart, comments: newChunk.comments, startLine: newChunk.startLine, index: newChunk.index});
+        } else {
           this.chunks = [newChunk];
         }
       },
 
-      _sort(comments) {
+      _sort: function (comments) {
         var compare = function (a, b) {
           if (a.position < b.position)
             return -1;
@@ -78,37 +74,34 @@ Syntax highlighting for textual diffs.
         return comments.sort(compare);
       },
 
-      makeChunk: function (comments, index, beforeStart, afterStart, code, oldChunk, startLine) {
+      makeChunk: function (comments, beforeStart, afterStart, code, startLine, hunkIndex) {
         var newChunk = {};
-        newChunk.comments = comments;
         newChunk.beforeStart = beforeStart;
         newChunk.afterStart = afterStart;
+        newChunk.code = code;
+        newChunk.comments = comments;
         newChunk.startLine = startLine;
-        newChunk.code = code.slice(oldChunk, index).join('\n');
+        newChunk.index = hunkIndex;
         this._addChunk(newChunk)
       },
 
       _getChunks: function (hunkObj) {
         this.chunks = [];
-        hunk = hunkObj.base;
-        console.log(hunk.comments.length);
+        var hunk = hunkObj.base;
         var hunkComments = this._sort(hunk.comments.slice(0));
 
         var code = hunk.code.split('\n');
 
         //Filter all comments that should be on a previous hunk
-        for (var index = 0; index < hunkComments.length; index++) {
-          if (hunkComments[index].position < hunk.startLine) {
-            hunkComments.splice(index, 1);
-          }
-          else {
-            break;
-          }
+        while (hunkComments && hunkComments[0] && hunkComments[0].position < hunk.startLine) {
+          hunkComments.shift();
         }
 
-        //There are no comments
+        //There are no comments for this hunk
         if (!hunkComments || hunkComments.length === 0) {
-          this.chunks = [hunk];
+          var newHunk = hunk;
+          newHunk.index = 0;
+          this.chunks = [newHunk];
           return;
         }
 
@@ -119,28 +112,23 @@ Syntax highlighting for textual diffs.
         var newAfterStart = hunk.afterStart;
         var hunkIndex = 0;
         var oldChunk = 0;
-        if (hunk.startLine === 26) {
-          debugger;
-        }
         code.forEach(function (line, index) {
           line.startsWith('+') ? '' : newBeforeStart++;
           line.startsWith('-') ? '' : newAfterStart++;
-          var call = false;
-          var newChunk = {};
           var comments = [];
           while ((index + Number(hunk.startLine)) === nextPos) {
-            call = true;
             comments.push(hunkComments[0]);
             hunkComments.shift();
             if (hunkComments[0]) {
               nextPos = hunkComments[0].position;
-            }
-            else {
+            } else {
               break;
             }
           }
-          if (call) {
-            this.makeChunk(comments, index + 1, beforeStart, afterStart, code, oldChunk, index + hunk.startLine);
+          if (comments.length > 0) {
+            var newCode = code.slice(oldChunk, index + 1).join('\n');
+            this.makeChunk(comments, beforeStart, afterStart, newCode, hunk.startLine + index, hunkIndex);
+            hunkIndex++;
             beforeStart = newBeforeStart;
             afterStart = newAfterStart;
             oldChunk = index + 1;
@@ -149,9 +137,11 @@ Syntax highlighting for textual diffs.
             }
           }
         }.bind(this));
-        if (oldChunk !== code.length && !(oldChunk + 1 === code.length && code[code.length - 1].startsWith('\\'))) {
-          // this.makeChunk([], code.length, beforeStart, afterStart, code, oldChunk);
-          this.makeChunk([], code.length, beforeStart, afterStart, code, oldChunk, hunk.startLine + oldChunk);
+
+        //If there is still code left after the last comment make a chunk for this.
+        if (code[oldChunk] && !(oldChunk + 1 === code.length && code[code.length - 1].startsWith('\\'))) {
+          var newCode = code.slice(oldChunk, code.length).join('\n');
+          this.makeChunk([], beforeStart, afterStart, newCode, hunk.startLine + oldChunk, hunkIndex);
         }
       }
     })

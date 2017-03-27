@@ -56,7 +56,8 @@ This code may only be used under the BSD style license found in LICENSE.txt
           value: false
         },
         startLine: Number,
-        comments: Array
+        comments: Array,
+        user: Object
       },
 
       _splitCode: function (e) {
@@ -80,11 +81,14 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
       addComment: function (e) {
         var newComment = {};
-        newComment.comment = e.detail;
+        newComment.body = e.detail;
         newComment.lineNumber = this.startLine;
         e.stopPropagation();
 
         this.fire('add-comment', newComment);
+        newComment.user = this.user;
+        newComment.created_at = new Date();
+        this.push('comments', newComment);
       }
     });
   </script>
