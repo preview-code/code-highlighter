@@ -91,15 +91,15 @@ Syntax highlighting for textual diffs.
       _getChunks: function (hunkObj) {
         this.chunks = [];
         hunk = hunkObj.base;
-
-        hunk.comments = this._sort(hunk.comments);
+        console.log(hunk.comments.length);
+        var hunkComments = this._sort(hunk.comments.slice(0));
 
         var code = hunk.code.split('\n');
 
         //Filter all comments that should be on a previous hunk
-        for (var index = 0; index < hunk.comments.length; index++) {
-          if (hunk.comments[index].position < hunk.startLine) {
-            hunk.comments.splice(index, 1);
+        for (var index = 0; index < hunkComments.length; index++) {
+          if (hunkComments[index].position < hunk.startLine) {
+            hunkComments.splice(index, 1);
           }
           else {
             break;
@@ -107,12 +107,12 @@ Syntax highlighting for textual diffs.
         }
 
         //There are no comments
-        if (!hunk.comments || hunk.comments.length === 0) {
+        if (!hunkComments || hunkComments.length === 0) {
           this.chunks = [hunk];
           return;
         }
 
-        var nextPos = hunk.comments[0].position;
+        var nextPos = hunkComments[0].position;
         var beforeStart = hunk.beforeStart;
         var afterStart = hunk.afterStart;
         var newBeforeStart = hunk.beforeStart;
@@ -130,10 +130,10 @@ Syntax highlighting for textual diffs.
           var comments = [];
           while ((index + Number(hunk.startLine)) === nextPos) {
             call = true;
-            comments.push(hunk.comments[0]);
-            hunk.comments.shift();
-            if (hunk.comments[0]) {
-              nextPos = hunk.comments[0].position;
+            comments.push(hunkComments[0]);
+            hunkComments.shift();
+            if (hunkComments[0]) {
+              nextPos = hunkComments[0].position;
             }
             else {
               break;
@@ -144,7 +144,7 @@ Syntax highlighting for textual diffs.
             beforeStart = newBeforeStart;
             afterStart = newAfterStart;
             oldChunk = index + 1;
-            if (hunk.comments.length === 0) {
+            if (hunkComments.length === 0) {
               return;
             }
           }
