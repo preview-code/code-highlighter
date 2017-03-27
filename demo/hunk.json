@@ -6,17 +6,17 @@
     "after_start": 190,
     "comments": [
       {
-        "comment": "hello",
-        "position":3,
-        "created_at":"2017-02-13T11:46:23Z",
+        "body": "hello",
+        "position": 3,
+        "created_at": "2017-02-13T11:46:23Z",
         "user": {
           "login": "Eva",
           "avatar_url": "https://avatars1.githubusercontent.com/u/5946438?v=3&s=460"
         }
       },
       {
-        "comment": "third",
-        "position": 3,
+        "body": "third",
+        "position": 15,
         "created_at": "2017-02-14T11:46:23Z",
         "user": {
           "login": "Eva",
@@ -24,7 +24,7 @@
         }
       },
       {
-        "comment": "should  be first",
+        "body": "should  be first",
         "position": 1,
         "user": {
           "login": "Eva",
@@ -47,7 +47,33 @@
     "diff_id": "@@ -1 +0,0 @@",
     "before_start": 1,
     "after_start": 0,
-    "comments": [],
+    "comments": [
+      {
+        "body": "should  be first",
+        "position": 1,
+        "user": {
+          "login": "Eva",
+          "avatar_url": "https://avatars1.githubusercontent.com/u/5946438?v=3&s=460"
+        }
+      }
+    ],
+    "startLine": 1
+  },
+  {
+    "diff": "+## TEST FILE",
+    "diff_id": "@@ -0,0 +1 @@",
+    "before_start": 0,
+    "after_start": 1,
+    "comments": [
+      {
+        "body": "should  be first",
+        "position": 1,
+        "user": {
+          "login": "Eva",
+          "avatar_url": "https://avatars1.githubusercontent.com/u/5946438?v=3&s=460"
+        }
+      }
+    ],
     "startLine": 1
   }
 ]
