@@ -27,63 +27,110 @@ This code may only be used under the BSD style license found in LICENSE.txt
   </test-fixture>
   <script>
     describe('<code-with-comment>', function () {
-      var elem;
+      var elem, lines;
+
+      var testcases = [
+        { clickedLine: 0, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 1, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 2, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 0, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 3 },
+        { clickedLine: 1, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 0 },
+        { clickedLine: 2, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 5012 },
+        { clickedLine: 0, beforeStart: 1, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 1, beforeStart: 312, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 2, beforeStart: 12312, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 0, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 1, beforeStart: 0, afterStart: 11312, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 2, beforeStart: 0, afterStart: 0, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 0, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 1, beforeStart: 0, afterStart: 1, clickedBefore: 12312, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 2, beforeStart: 0, afterStart: 1, clickedBefore: 0, clickedAfter: 43, startLine: 1 },
+        { clickedLine: 0, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 432, startLine: 1 },
+        { clickedLine: 1, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 0, startLine: 1 },
+        { clickedLine: 2, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 142, startLine: 1 }
+      ]
+
       beforeEach(function () {
         elem = fixture('basic');
-        elem.code = 'first line \n second line \n';
+        lines = ['first line', 'second line', 'thrid line', 'fort knox'];
+        elem.code = lines.join('\n');
         elem.beforeStart = 0;
         elem.afterStart = 1;
-        elem.indexItem = 0;
-        elem.hideAddComments = false;
+        elem.startLine = 1;
         elem.comments = ['test'];
       });
 
-      it('firing event shows comments', function () {
-        elem.hideAddComments = true;
-        assert.equal(elem.hideAddComments, true);
-        elem.fire('click-line');
-        assert.equal(elem.hideAddComments, false);
-      });
+      testcases.forEach(function (testcase, index) {
+        describe('<testing the split-line method> ' + index, function () {
 
-      it('code is splitted correct', function (done) {
-        elem.addEventListener('click-line', function (e) {
-          assert.equal(elem.code, 'first line ');
-          assert.equal(e.detail.code, ' second line \n');
-          done();
+          beforeEach(function () {
+            elem = fixture('basic');
+            lines = ['first line', 'second line', 'thrid line', 'fort knox'];
+            elem.code = lines.join('\n');
+            elem.beforeStart = testcase.beforeStart;
+            elem.afterStart = testcase.afterStart;
+            elem.startLine = testcase.startLine;
+            elem.comments = ['test'];
+          });
+
+          it('code is splitted correct', function (done) {
+            this.timeout(1000);
+            elem.addEventListener('add-chunk-with-comment', function (e) {
+              assert.equal(e.detail.code, getLines(0, testcase.clickedLine));
+              assert.equal(elem.code, getLines(testcase.clickedLine + 1, lines.length));
+              assert.equal(e.detail.beforeStart, testcase.beforeStart);
+              assert.equal(elem.beforeStart, testcase.clickedBefore);
+              assert.equal(e.detail.afterStart, testcase.afterStart);
+              assert.equal(elem.afterStart, testcase.clickedAfter);
+              assert.deepEqual(elem.comments, ['test']);
+              assert.equal(elem.hideAddComments, true);
+              assert.equal(e.detail.startLine, testcase.startLine);
+              assert.equal(elem.startLine, testcase.startLine + testcase.clickedLine + 1);
+
+              done();
+            });
+            elem.fire('click-line', { lineNumber: testcase.clickedLine, beforeStart: testcase.clickedBefore, afterStart: testcase.clickedAfter });
+          });
         });
-        elem.fire('click-line', {lineNumber: 1, lines: 2})
       });
 
-      it('click-line fires add-chunk-with-comment', function () {
-        elem.hideAddComments = true;
-
+      it('Does not fire event when clicked on last line', function (done) {
         elem.addEventListener('add-chunk-with-comment', function (e) {
-          assert.equal(e.detail.comments, 'test');
-          assert.equal(e.detail.beforeStart, 0)
-          assert.equal(e.detail.afterStart, 1)
-          assert.equal(e.detail.code, ' second line \n');
-          assert.equal(e.detail.index, 1);
+          done("Should not been fired");
         });
+        setTimeout(done, 100);
+        elem.fire('click-line', { lineNumber: 3, beforeStart: 3, afterStart: 4 });
+      });
 
-        elem.fire('click-line', {beforeStart: 0, afterStart: 1, code: ' second line \n', index: 1});
+      it('Shows the comments input when clicking on the last line', function () {
+        assert.equal(elem.hideAddComments, true);
+        elem.fire('click-line', { lineNumber: 3, beforeStart: 3, afterStart: 4 });
         assert.equal(elem.hideAddComments, false);
       });
 
-      it('resets comments when new hunk end', function (done) {
-        elem.addEventListener('click-line', function () {
-          assert.deepEqual(elem.comments, []);
+      it('has correct position when adding comment', function (done) {
+        var e = new Event('body of comment');
+        elem.addEventListener('add-comment', function (e) {
+          assert.equal(e.detail.position, 4);
           done();
         });
-        elem.fire('click-line', {lineNumber: 1, lines: 2})
+        elem.addComment(e);
       });
 
-      it('does not reset comment, when adding a comment', function (done) {
-        elem.addEventListener('click-line', function () {
-          assert.deepEqual(elem.comments, ['test']);
+
+      it('has correct values when adding comment', function (done) {
+        elem.startLine = 500;
+        var e = new Event('body of comment');
+        elem.addEventListener('add-comment', function (e) {
+          assert.equal(e.detail.position, 503);
           done();
         });
-        elem.fire('click-line', {lineNumber: 1, lines: 1})
+        elem.addComment(e);
       });
+
+      var getLines = function (from, to) {
+        return lines.slice(from, to + 1).join('\n');
+      }
     });
   </script>
 </body>

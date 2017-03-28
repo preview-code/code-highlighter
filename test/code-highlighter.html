@@ -33,19 +33,18 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
       beforeEach(function () {
         elem = fixture('basic');
-        elem.code = 'first line \n second line \n';
+        elem.code = 'first line \n second line';
         elem.beforeStart = 0;
         elem.afterStart = 1;
         elem.canSplit = true;
         elem.index = 0;
-        elem._amountLines = 2;
       });
 
       it('tap button fires event', function (done) {
         elem.addEventListener('click-line', function (e) {
           assert.equal(e.detail.beforeStart, elem.beforeStart + 1)
           assert.equal(e.detail.afterStart, elem.afterStart + 1)
-          assert.equal(e.detail.lineNumber, 1);
+          assert.equal(e.detail.lineNumber, 0);
           assert.equal(e.detail.lines, elem._amountLines);
           done();
         });
@@ -57,7 +56,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         it('tapping all buttons, fires events', function (done) {
           elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
           elem.addEventListener('click-line', function (e) {
-            assert.equal(e.detail.lineNumber, count + 1);
+            assert.equal(e.detail.lineNumber, count);
             done();
           });
           var icons = Polymer.dom(elem.root).querySelectorAll('iron-icon');
@@ -85,6 +84,10 @@ This code may only be used under the BSD style license found in LICENSE.txt
           assert.equal(icon.getComputedStyleValue('opacity'), '0');
           done();
         });
+      });
+
+      it('should have correct value for amountLines', function(){
+        assert.equal(elem.amountLines, 2);
       });
     });
 

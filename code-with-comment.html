@@ -22,7 +22,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
       }
     </style>
 
-    <code-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
+    <code-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true" amount-lines="{{amountLines}}"></code-highlighter>
     <comment-list list="[[comments]]"></comment-list>
     <add-comment on-add-comment="addComment" hidden="{{hideAddComments}}" project="[[project]]" line-comment="true"></add-comment>
   </template>
@@ -46,7 +46,6 @@ This code may only be used under the BSD style license found in LICENSE.txt
           type: Number,
           notify: true
         },
-        indexItem: Number,
         hideAddComments: {
           type: Boolean,
           value: true
@@ -57,32 +56,36 @@ This code may only be used under the BSD style license found in LICENSE.txt
         },
         startLine: Number,
         comments: Array,
-        user: Object
+        user: Object,
+        amountLines: Number
       },
 
       _splitCode: function (e) {
-        this.hideAddComments = false;
         e.stopPropagation();
 
-        var newHunk = e.detail;
-        if (newHunk.lineNumber !== newHunk.lines) {
-          this.lineNumber = newHunk.lineNumber;
-          newHunk.comments = this.comments;
-          newHunk.index = this.indexItem + 1;
-          newHunk.startLine = this.startLine;
-          this.startLine = this.startLine + newHunk.lineNumber;
-          this.comments = [];
+        var lineInfo = e.detail;
+        if (lineInfo.lineNumber !== this.amountLines - 1) {
+          var newChunk = {};
+          newChunk.startLine = this.startLine;
+          newChunk.beforeStart = this.beforeStart;
+          newChunk.afterStart = this.afterStart;
+
           var x = this.code.split('\n');
-          newHunk.code = x.slice(newHunk.lineNumber, this.code.length - 1).join('\n');
-          this.code = x.slice(0, newHunk.lineNumber).join('\n');
-          this.fire('add-chunk-with-comment', newHunk);
+          this.code = x.splice(lineInfo.lineNumber + 1, this.code.length).join('\n');
+          newChunk.code = x.join('\n');
+          this.beforeStart = lineInfo.beforeStart;
+          this.afterStart = lineInfo.afterStart;
+          this.startLine = this.startLine + lineInfo.lineNumber + 1;
+          this.fire('add-chunk-with-comment', newChunk);
+        } else {
+          this.hideAddComments = false;
         }
       },
 
       addComment: function (e) {
         var newComment = {};
         newComment.body = e.detail;
-        newComment.lineNumber = this.startLine;
+        newComment.position = this.startLine + this.amountLines - 1;
         e.stopPropagation();
 
         this.fire('add-comment', newComment);

@@ -92,7 +92,7 @@ Syntax highlighting for textual diffs.
 
     <div id="beforeColumn"></div>
     <div id="afterColumn"></div>
-    <div id="iconColumn" on-tap="_splitHunk" hidden$="[[!canSplit]]"></div>
+    <div id="iconColumn" on-tap="_splitChunk" hidden$="[[!canSplit]]"></div>
     <div id="codeColumn">
       <div id="diffColors"></div>
       <pre><code id="code"></code></pre>
@@ -126,7 +126,10 @@ Syntax highlighting for textual diffs.
           type: Number,
           notify: true
         },
-        _amountLines: Number,
+        amountLines:  {
+          type: Number,
+          notify: true
+        },
         canSplit: {
           type: Boolean,
           value: false
@@ -154,11 +157,6 @@ Syntax highlighting for textual diffs.
 
       _onDiffChange: function (code, beforeStart, afterStart) {
         var lines = code.split('\n');
-
-        // The last line may be empty.
-        if (code.charAt(code.length - 1) === '\n') {
-          lines.pop();
-        }
 
         var before = beforeStart;
         var after = afterStart;
@@ -192,7 +190,7 @@ Syntax highlighting for textual diffs.
             amountLines++;
           }
         });
-        this._amountLines = amountLines;
+        this.amountLines = amountLines;
 
         strippedCode = strippedCode.reduce(function (acc, line) {
           return acc + '\n' + line;
@@ -224,16 +222,15 @@ Syntax highlighting for textual diffs.
         Polymer.dom(this.$.diffColors).innerHTML = content;
       },
 
-      _splitHunk: function (e) {
+      _splitChunk: function (e) {
         var path = e.target;
         if (path.localName === 'iron-icon') {
           var lineInfo = {};
           lineInfo.beforeStart = path.getAttribute('before');
           lineInfo.afterStart = path.getAttribute('after');
-          lineInfo.lineNumber = Number(path.getAttribute('index')) + 1;
-          lineInfo.lines = this._amountLines;
+          lineInfo.lineNumber = Number(path.getAttribute('index'));
+          this.fire('click-line', lineInfo);
         }
-        this.fire('click-line', lineInfo);
       },
 
       _markClass: function (mark) {
