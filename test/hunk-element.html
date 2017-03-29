@@ -98,7 +98,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         assert.equal(elem.chunks[1].startLine, 2);
       });
 
-      it('does not make extra chunk, when comments are not for this hunk', function () {
+      it('does not make extra chunk, when comments are for next hunks', function () {
         comment1.position = 16;
         elem.push('hunk.comments', comment1);
         assert.equal(elem.chunks.length, 1);
@@ -109,7 +109,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         assert.equal(elem.chunks[0].startLine, 1);
       });
 
-      it('does not make extra chunk, when comments are not for this hunk', function () {
+      it('does not make extra chunk, when comments are for previous hunks', function () {
         comment1.position = 1;
         elem.set('hunk.startLine', 5);
         elem.push('hunk.comments', comment1);

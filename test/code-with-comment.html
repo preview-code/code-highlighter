@@ -50,6 +50,8 @@ This code may only be used under the BSD style license found in LICENSE.txt
         { clickedLine: 2, beforeStart: 0, afterStart: 1, clickedBefore: 42, clickedAfter: 142, startLine: 1 }
       ]
 
+      var startLines = [1, 16, 53, 430, 600, 2014];
+
       beforeEach(function () {
         elem = fixture('basic');
         lines = ['first line', 'second line', 'thrid line', 'fort knox'];
@@ -58,6 +60,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         elem.afterStart = 1;
         elem.startLine = 1;
         elem.comments = ['test'];
+        elem.user = {name: 'User', html_url: 'https://preview-code.com', avatar_url: 'https://preview-code.com'};
       });
 
       testcases.forEach(function (testcase, index) {
@@ -108,24 +111,39 @@ This code may only be used under the BSD style license found in LICENSE.txt
         assert.equal(elem.hideAddComments, false);
       });
 
-      it('has correct position when adding comment', function (done) {
-        var e = new Event('body of comment');
-        elem.addEventListener('add-comment', function (e) {
-          assert.equal(e.detail.position, 4);
-          done();
-        });
-        elem.addComment(e);
+      startLines.forEach(function (startLine, index) {
+        it('has correct values when adding comment ' + index, function (done) {
+          elem.startLine = startLine;
+          var e = new Event('add-comment');
+          var body = 'body of comment';
+          e.detail = body;
+
+          elem.addEventListener('add-comment', function (e) {
+            assert.equal(e.detail.position, lines.length + elem.startLine - 1);
+            assert.equal(e.detail.body, body);
+            done();
+          });
+          elem.addComment(e);
+        })
       });
 
-
-      it('has correct values when adding comment', function (done) {
-        elem.startLine = 500;
-        var e = new Event('body of comment');
-        elem.addEventListener('add-comment', function (e) {
-          assert.equal(e.detail.position, 503);
-          done();
+      startLines.forEach(function (startLine, index) {
+        it('adds comments to array ' + index, function () {
+          var date = new Date().getTime();
+          elem.startLine = startLine;
+          var e = new Event('add-comment');
+          var body = 'body of comment';
+          e.detail = body;
+          var amountComments = elem.comments.length;
+          elem.addComment(e);
+          assert.equal(elem.comments.length, amountComments + 1);
+          assert.deepEqual(elem.comments[1].user, elem.user);
+          assert.equal(elem.comments[1].position, lines.length + elem.startLine - 1);
+          assert.equal(elem.comments[1].body, body);
+          assert.isDefined(elem.comments[1].created_at);
+          assert.isAtMost(elem.comments[1].created_at.getTime(), new Date().getTime());
+          assert.isAtLeast(elem.comments[1].created_at.getTime(), date);
         });
-        elem.addComment(e);
       });
 
       var getLines = function (from, to) {
