@@ -37,24 +37,24 @@ This code may only be used under the BSD style license found in LICENSE.txt
       });
 
       it('firing adds hunk', function () {
-        assert.equal(elem.chunks.length, 1);
+        assert.equal(elem._chunks.length, 1);
         var e = new Event('add-chunk-with-code');
         e.model = {};
         e.model.index = 0;
         e.detail = { code: 'first line', beforeStart: 3, afterStart: 4, startLine: 0 };
         elem._insertChunk(e);
-        assert.equal(elem.chunks.length, 2);
-        assert.equal(elem.chunks[0].code, 'first line');
-        assert.equal(elem.chunks[0].beforeStart, 3);
-        assert.equal(elem.chunks[0].afterStart, 4);
-        assert.deepEqual(elem.chunks[0].comments, []);
-        assert.equal(elem.chunks[0].startLine, 0);
+        assert.equal(elem._chunks.length, 2);
+        assert.equal(elem._chunks[0].code, 'first line');
+        assert.equal(elem._chunks[0].beforeStart, 3);
+        assert.equal(elem._chunks[0].afterStart, 4);
+        assert.deepEqual(elem._chunks[0].comments, []);
+        assert.equal(elem._chunks[0].startLine, 0);
 
-        assert.equal(elem.chunks[1].code, 'second line');
-        assert.equal(elem.chunks[1].beforeStart, 5);
-        assert.equal(elem.chunks[1].afterStart, 6);
-        assert.deepEqual(elem.chunks[1].comments, [comment1]);
-        assert.equal(elem.chunks[1].startLine, 1);
+        assert.equal(elem._chunks[1].code, 'second line');
+        assert.equal(elem._chunks[1].beforeStart, 5);
+        assert.equal(elem._chunks[1].afterStart, 6);
+        assert.deepEqual(elem._chunks[1].comments, [comment1]);
+        assert.equal(elem._chunks[1].startLine, 1);
       });
 
       it('does not sort when already in correct order', function () {
@@ -77,48 +77,48 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
       it('When no comments, there is one chunk', function () {
         elem.set('hunk.comments', []);
-        assert.equal(elem.chunks.length, 1);
-        assert.deepEqual(elem.chunks, [elem.hunk]);
+        assert.equal(elem._chunks.length, 1);
+        assert.deepEqual(elem._chunks, [elem.hunk]);
       });
 
       it('makes correct hunks', function () {
         elem.set('hunk.code', 'first line \n second line \n third line');
-        assert.equal(elem.chunks.length, 2);
+        assert.equal(elem._chunks.length, 2);
 
-        assert.equal(elem.chunks[0].code, 'first line ');
-        assert.equal(elem.chunks[0].beforeStart, 5);
-        assert.equal(elem.chunks[0].afterStart, 6);
-        assert.deepEqual(elem.chunks[0].comments, [comment1]);
-        assert.equal(elem.chunks[0].startLine, 1);
+        assert.equal(elem._chunks[0].code, 'first line ');
+        assert.equal(elem._chunks[0].beforeStart, 5);
+        assert.equal(elem._chunks[0].afterStart, 6);
+        assert.deepEqual(elem._chunks[0].comments, [comment1]);
+        assert.equal(elem._chunks[0].startLine, 1);
 
-        assert.equal(elem.chunks[1].code, ' second line \n third line');
-        assert.equal(elem.chunks[1].beforeStart, 6);
-        assert.equal(elem.chunks[1].afterStart, 7);
-        assert.deepEqual(elem.chunks[1].comments, []);
-        assert.equal(elem.chunks[1].startLine, 2);
+        assert.equal(elem._chunks[1].code, ' second line \n third line');
+        assert.equal(elem._chunks[1].beforeStart, 6);
+        assert.equal(elem._chunks[1].afterStart, 7);
+        assert.deepEqual(elem._chunks[1].comments, []);
+        assert.equal(elem._chunks[1].startLine, 2);
       });
 
       it('does not make extra chunk, when comments are for next hunks', function () {
         comment1.position = 16;
         elem.push('hunk.comments', comment1);
-        assert.equal(elem.chunks.length, 1);
-        assert.deepEqual(elem.chunks[0].comments, []);
-        assert.equal(elem.chunks[0].code, 'second line');
-        assert.equal(elem.chunks[0].beforeStart, 5);
-        assert.equal(elem.chunks[0].afterStart, 6);
-        assert.equal(elem.chunks[0].startLine, 1);
+        assert.equal(elem._chunks.length, 1);
+        assert.deepEqual(elem._chunks[0].comments, []);
+        assert.equal(elem._chunks[0].code, 'second line');
+        assert.equal(elem._chunks[0].beforeStart, 5);
+        assert.equal(elem._chunks[0].afterStart, 6);
+        assert.equal(elem._chunks[0].startLine, 1);
       });
 
       it('does not make extra chunk, when comments are for previous hunks', function () {
         comment1.position = 1;
         elem.set('hunk.startLine', 5);
         elem.push('hunk.comments', comment1);
-        assert.equal(elem.chunks.length, 1);
-        assert.deepEqual(elem.chunks[0].comments, []);
-        assert.equal(elem.chunks[0].code, 'second line');
-        assert.equal(elem.chunks[0].beforeStart, 5);
-        assert.equal(elem.chunks[0].afterStart, 6);
-        assert.equal(elem.chunks[0].startLine, 5);
+        assert.equal(elem._chunks.length, 1);
+        assert.deepEqual(elem._chunks[0].comments, []);
+        assert.equal(elem._chunks[0].code, 'second line');
+        assert.equal(elem._chunks[0].beforeStart, 5);
+        assert.equal(elem._chunks[0].afterStart, 6);
+        assert.equal(elem._chunks[0].startLine, 5);
       });
 
 

@@ -45,7 +45,6 @@ This code may only be used under the BSD style license found in LICENSE.txt
           assert.equal(e.detail.beforeStart, elem.beforeStart + 1)
           assert.equal(e.detail.afterStart, elem.afterStart + 1)
           assert.equal(e.detail.lineNumber, 0);
-          assert.equal(e.detail.lines, elem._amountLines);
           done();
         });
         var icon = Polymer.dom(elem.root).querySelector('iron-icon');

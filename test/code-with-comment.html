@@ -123,7 +123,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
             assert.equal(e.detail.body, body);
             done();
           });
-          elem.addComment(e);
+          elem._addComment(e);
         })
       });
 
@@ -135,7 +135,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
           var body = 'body of comment';
           e.detail = body;
           var amountComments = elem.comments.length;
-          elem.addComment(e);
+          elem._addComment(e);
           assert.equal(elem.comments.length, amountComments + 1);
           assert.deepEqual(elem.comments[1].user, elem.user);
           assert.equal(elem.comments[1].position, lines.length + elem.startLine - 1);

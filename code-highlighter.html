@@ -128,7 +128,8 @@ Syntax highlighting for textual diffs.
         },
         amountLines: {
           type: Number,
-          notify: true
+          notify: true,
+          readOnly: true
         },
         canSplit: {
           type: Boolean,
@@ -190,8 +191,7 @@ Syntax highlighting for textual diffs.
             amountLines++;
           }
         });
-        this.amountLines = amountLines;
-
+        this._setAmountLines(amountLines);
         strippedCode = strippedCode.reduce(function (acc, line) {
           return acc + '\n' + line;
         });

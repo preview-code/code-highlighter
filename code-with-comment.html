@@ -22,9 +22,9 @@ This code may only be used under the BSD style license found in LICENSE.txt
       }
     </style>
 
-    <code-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true" amount-lines="{{amountLines}}"></code-highlighter>
+    <code-highlighter id="highlighter" code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
     <comment-list list="[[comments]]"></comment-list>
-    <add-comment on-add-comment="addComment" hidden="{{hideAddComments}}" project="[[project]]" line-comment="true"></add-comment>
+    <add-comment on-add-comment="_addComment" hidden="{{hideAddComments}}" project="[[project]]" line-comment="true"></add-comment>
   </template>
 
   <script>
@@ -53,22 +53,23 @@ This code may only be used under the BSD style license found in LICENSE.txt
         startLine: Number,
         comments: Array,
         user: Object,
-        amountLines: Number
       },
 
       _splitCode: function (e) {
         e.stopPropagation();
 
         var lineInfo = e.detail;
-        if (lineInfo.lineNumber !== this.amountLines - 1) {
-          var newChunk = {};
-          newChunk.startLine = this.startLine;
-          newChunk.beforeStart = this.beforeStart;
-          newChunk.afterStart = this.afterStart;
-
+        if (lineInfo.lineNumber !== this.$.highlighter.amountLines - 1) {
           var x = this.code.split('\n');
           this.code = x.splice(lineInfo.lineNumber + 1, this.code.length).join('\n');
-          newChunk.code = x.join('\n');
+
+          var newChunk = {
+            startLine: this.startLine,
+            beforeStart: this.beforeStart,
+            afterStart: this.afterStart,
+            code: x.join('\n')
+          };
+
           this.beforeStart = lineInfo.beforeStart;
           this.afterStart = lineInfo.afterStart;
           this.startLine = this.startLine + lineInfo.lineNumber + 1;
@@ -78,10 +79,10 @@ This code may only be used under the BSD style license found in LICENSE.txt
         }
       },
 
-      addComment: function (e) {
+      _addComment: function (e) {
         var newComment = {};
         newComment.body = e.detail;
-        newComment.position = this.startLine + this.amountLines - 1;
+        newComment.position = this.startLine + this.$.highlighter.amountLines - 1;
         e.stopPropagation();
 
         this.fire('add-comment', newComment);
