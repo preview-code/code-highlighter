@@ -1,6 +1,6 @@
 {
   "name": "code-highlighter",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Syntax highlighting for textual diffs",
   "authors": [
     "Preview-Code team"
@@ -24,7 +24,9 @@
     "polymer": "^1.8.0",
     "paper-input": "PolymerElements/paper-input#^1.1.23",
     "iron-icon": "PolymerElements/iron-icon#^1.0.12",
-    "paper-button": "PolymerElements/paper-button#^1.0.14"
+    "paper-button": "PolymerElements/paper-button#^1.0.14",
+    "comments": "preview-code/comments#^0.1.0",
+    "util": "preview-code/util"
   },
   "devDependencies": {
     "iron-component-page": "^1.1.8",

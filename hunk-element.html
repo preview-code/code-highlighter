@@ -4,10 +4,6 @@ Copyright (c) 2017 Preview-Code. All rights reserved.
 This code may only be used under the BSD style license found in LICENSE.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="highlight-import.html">
-<link rel="import" href="highlight-styles.html">
-<link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="code-highlighter.html">
 <link rel="import" href="code-with-comment.html">
 
 <!--
@@ -24,9 +20,10 @@ Syntax highlighting for textual diffs.
       }
     </style>
 
-    <template is="dom-repeat" items="{{hunks}}">
-      <code-with-comment code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}" comments="{{item.comments}}"
-        index-item="[[index]]" hide-comments="[[hideComments]]"></code-with-comment>
+    <template is="dom-repeat" items="{{_chunks}}">
+      <code-with-comment on-add-chunk-with-comment="_insertChunk" code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}"
+        comments="{{item.comments}}" _onHunkChange hide-comments="[[hideComments]]" start-line="{{item.startLine}}" user="[[user]]"
+        hide-add-comments="{{item.hideAddComments}}"></code-with-comment>
     </template>
 
   </template>
@@ -35,21 +32,91 @@ Syntax highlighting for textual diffs.
     Polymer({
       is: 'hunk-element',
 
-      listeners: {
-        'add-chunk-with-comment': '_addHunk'
-      },
+      observers: ['_onHunkChange(hunk.*)'],
       properties: {
-        hunks: {
+        hunk: Object,
+        hideComments: Boolean,
+        _chunks: {
           type: Array,
-          value: function () {
-            return [];
-          }
         },
-        hideComments: Boolean
+        user: Object
       },
-      _addHunk: function (e) {
-        var newHunk = e.detail;
-        this.splice('hunks', newHunk.index + 1, 0, {code: newHunk.code, beforeStart: newHunk.beforeStart, afterStart: newHunk.afterStart, comments: newHunk.comments});
+      _insertChunk: function (e) {
+        e.detail.comments = [];
+        e.detail.hideAddComments = false;
+        this.splice('_chunks', e.model.index, 0, e.detail);
+      },
+
+      _sort: function (comments) {
+        var compare = function (a, b) {
+          if (a.position < b.position)
+            return -1;
+          if (a.position > b.position)
+            return 1;
+          if (a.created_at > b.created_at)
+            return 1;
+          return 0;
+        }
+
+        return comments.sort(compare);
+      },
+
+      _onHunkChange: function (hunkObj) {
+        this._chunks = [];
+        var hunk = hunkObj.base;
+        var hunkComments = this._sort(hunk.comments.slice(0))
+          .filter(function (comment) {
+            return comment.position >= hunk.startLine
+          });
+
+        //There are no comments for this hunk
+        if (!hunkComments || hunkComments.length === 0) {
+          hunk.comments = [];
+          this._chunks = [hunk];
+          return;
+        }
+
+        var code = hunk.code.split('\n');
+
+        var beforeStart = hunk.beforeStart;
+        var afterStart = hunk.afterStart;
+        var newBeforeStart = hunk.beforeStart;
+        var newAfterStart = hunk.afterStart;
+        var oldChunk = 0;
+        var comments = [];
+        code.forEach(function (line, index) {
+          if (!line.startsWith('+')) newBeforeStart++;
+          if (!line.startsWith('-')) newAfterStart++;
+
+          while (hunkComments.length && (index + Number(hunk.startLine)) === hunkComments[0].position) {
+            comments.push(hunkComments[0]);
+            hunkComments.shift();
+          }
+          if (comments.length > 0) {
+            var newCode = code.slice(oldChunk, index + 1).join('\n');
+            this.push('_chunks', {
+              beforeStart: beforeStart, afterStart: afterStart, code: newCode,
+              comments: comments, startLine: hunk.startLine + oldChunk, hideAddComments: true
+            });
+            comments = [];
+            beforeStart = newBeforeStart;
+            afterStart = newAfterStart;
+            oldChunk = index + 1;
+            if (hunkComments.length === 0) {
+              return;
+            }
+          }
+        }.bind(this));
+
+        //If there is still code left after the last comment make a chunk for this.
+        //We should ignore if that is a line we later ommit.
+        if (code[oldChunk] && !(oldChunk + 1 === code.length && code[code.length - 1].startsWith('\\'))) {
+          var newCode = code.slice(oldChunk, code.length).join('\n');
+          this.push('_chunks', {
+            beforeStart: beforeStart, afterStart: afterStart, code: newCode,
+            comments: [], startLine: hunk.startLine + oldChunk, hideAddComments: true
+          });
+        }
       }
     })
   </script>

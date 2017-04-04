@@ -4,8 +4,9 @@ Copyright (c) 2017 Preview-Code. All rights reserved.
 This code may only be used under the BSD style license found in LICENSE.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../comments/add-comment.html">
+<link rel="import" href="../comments/comment-list.html">
 <link rel="import" href="code-highlighter.html">
-<link rel="import" href="comment-container.html">
 
 
 <dom-module id="code-with-comment">
@@ -21,8 +22,9 @@ This code may only be used under the BSD style license found in LICENSE.txt
       }
     </style>
 
-    <code-highlighter code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
-    <comment-container hidden="[[hideComments]]" hide-add="{{hideAddComments}}" comments="{{comments}}"></comment-container>
+    <code-highlighter id="highlighter" code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
+    <comment-list list="[[comments]]"></comment-list>
+    <add-comment on-add-comment="_addComment" hidden="{{hideAddComments}}" project="[[project]]" line-comment="true"></add-comment>
   </template>
 
   <script>
@@ -44,31 +46,49 @@ This code may only be used under the BSD style license found in LICENSE.txt
           type: Number,
           notify: true
         },
-        indexItem: Number,
         hideAddComments: {
           type: Boolean,
           value: true
         },
-        hideComments: {
-          type: Boolean,
-          value: false
-        },
-        comments: Array
+        startLine: Number,
+        comments: Array,
+        user: Object,
       },
+
       _splitCode: function (e) {
-        this.hideAddComments = false;
         e.stopPropagation();
 
-        var newHunk = e.detail;
-        if (newHunk.lineNumber !== newHunk.lines) {
-          newHunk.comments = this.comments;
-          newHunk.index = this.indexItem;
-          this.comments = [];
+        var lineInfo = e.detail;
+        if (lineInfo.lineNumber !== this.$.highlighter.amountLines - 1) {
           var x = this.code.split('\n');
-          newHunk.code = x.slice(newHunk.lineNumber, this.code.length - 1).join('\n');
-          this.code = x.slice(0, newHunk.lineNumber).join('\n');
-          this.fire('add-chunk-with-comment', newHunk);
+          this.code = x.splice(lineInfo.lineNumber + 1, this.code.length).join('\n');
+
+          var newChunk = {
+            startLine: this.startLine,
+            beforeStart: this.beforeStart,
+            afterStart: this.afterStart,
+            code: x.join('\n')
+          };
+
+          this.beforeStart = lineInfo.beforeStart;
+          this.afterStart = lineInfo.afterStart;
+          this.startLine = this.startLine + lineInfo.lineNumber + 1;
+          this.fire('add-chunk-with-comment', newChunk);
+        } else {
+          this.hideAddComments = false;
         }
+      },
+
+      _addComment: function (e) {
+        var newComment = {};
+        newComment.body = e.detail;
+        newComment.position = this.startLine + this.$.highlighter.amountLines - 1;
+        e.stopPropagation();
+
+        this.fire('add-comment', newComment);
+        newComment.user = this.user;
+        newComment.created_at = new Date();
+        this.push('comments', newComment);
       }
     });
   </script>
