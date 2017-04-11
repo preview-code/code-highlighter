@@ -51,6 +51,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
       ]
 
       var startLines = [1, 16, 53, 430, 600, 2014];
+      var user = { name: 'User', html_url: 'https://preview-code.com', avatar_url: 'https://preview-code.com' };
 
       beforeEach(function () {
         elem = fixture('basic');
@@ -60,7 +61,6 @@ This code may only be used under the BSD style license found in LICENSE.txt
         elem.afterStart = 1;
         elem.startLine = 1;
         elem.comments = ['test'];
-        elem.user = {name: 'User', html_url: 'https://preview-code.com', avatar_url: 'https://preview-code.com'};
       });
 
       testcases.forEach(function (testcase, index) {
@@ -98,8 +98,8 @@ This code may only be used under the BSD style license found in LICENSE.txt
       });
 
       it('Does not fire event when clicked on last line', function (done) {
-        elem.addEventListener('add-chunk-with-comment', function (e) {
-          done("Should not been fired");
+        elem.addEventListener('add-chunk-with-comment', function () {
+          done('Should not been fired');
         });
         setTimeout(done, 100);
         elem.fire('click-line', { lineNumber: 3, beforeStart: 3, afterStart: 4 });
@@ -119,8 +119,9 @@ This code may only be used under the BSD style license found in LICENSE.txt
           e.detail = body;
 
           elem.addEventListener('add-comment', function (e) {
-            assert.equal(e.detail.position, lines.length + elem.startLine - 1);
-            assert.equal(e.detail.body, body);
+            assert.equal(e.detail.comment.position, lines.length + elem.startLine - 1);
+            assert.equal(e.detail.comment.body, body);
+            assert.isFunction(e.detail.onSuccess);
             done();
           });
           elem._addComment(e);
@@ -128,7 +129,21 @@ This code may only be used under the BSD style license found in LICENSE.txt
       });
 
       startLines.forEach(function (startLine, index) {
-        it('adds comments to array ' + index, function () {
+        it('adds comments to array on callback ' + index, function (done) {
+
+          elem.addEventListener('add-comment', function (e) {
+            assert.deepEqual(elem.comments, ['test'])
+            e.detail.onSuccess(user);
+            assert.equal(elem.comments.length, amountComments + 1);
+            assert.deepEqual(elem.comments[1].user, user);
+            assert.equal(elem.comments[1].position, lines.length + elem.startLine - 1);
+            assert.equal(elem.comments[1].body, body);
+            assert.isDefined(elem.comments[1].created_at);
+            assert.isAtMost(elem.comments[1].created_at.getTime(), new Date().getTime());
+            assert.isAtLeast(elem.comments[1].created_at.getTime(), date);
+            done();
+          });
+
           var date = new Date().getTime();
           elem.startLine = startLine;
           var e = new Event('add-comment');
@@ -136,15 +151,14 @@ This code may only be used under the BSD style license found in LICENSE.txt
           e.detail = body;
           var amountComments = elem.comments.length;
           elem._addComment(e);
-          assert.equal(elem.comments.length, amountComments + 1);
-          assert.deepEqual(elem.comments[1].user, elem.user);
-          assert.equal(elem.comments[1].position, lines.length + elem.startLine - 1);
-          assert.equal(elem.comments[1].body, body);
-          assert.isDefined(elem.comments[1].created_at);
-          assert.isAtMost(elem.comments[1].created_at.getTime(), new Date().getTime());
-          assert.isAtLeast(elem.comments[1].created_at.getTime(), date);
+
         });
       });
+
+
+      it('Add comments are hidden on default', function () {
+        assert.equal(elem.hideAddComments, true);
+      })
 
       var getLines = function (from, to) {
         return lines.slice(from, to + 1).join('\n');

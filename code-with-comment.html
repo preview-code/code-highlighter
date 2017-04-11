@@ -52,7 +52,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
         },
         startLine: Number,
         comments: Array,
-        user: Object,
+        project: Object
       },
 
       _splitCode: function (e) {
@@ -83,12 +83,16 @@ This code may only be used under the BSD style license found in LICENSE.txt
         var newComment = {};
         newComment.body = e.detail;
         newComment.position = this.startLine + this.$.highlighter.amountLines - 1;
+        newComment.type = 'line';
         e.stopPropagation();
 
-        this.fire('add-comment', newComment);
-        newComment.user = this.user;
-        newComment.created_at = new Date();
-        this.push('comments', newComment);
+        var submit = function (user) {
+          newComment.user = user;
+          newComment.created_at = new Date();
+          this.push('comments', newComment);
+        }.bind(this);
+
+        this.fire('add-comment', { comment: newComment, onSuccess: submit });
       }
     });
   </script>
