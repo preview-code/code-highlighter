@@ -24,7 +24,7 @@ Syntax highlighting for textual diffs.
 
       #beforeColumn,
       #afterColumn {
-        @apply(--line-number-columns);
+        @apply --line-number-columns;
       }
 
       #iconColumn {
@@ -34,7 +34,7 @@ Syntax highlighting for textual diffs.
       #beforeColumn > span,
       #afterColumn > span {
         padding: 0 4px;
-        @apply(--line-numbers);
+        @apply --line-numbers;
         display: block;
         text-align: center;
       }
@@ -43,7 +43,7 @@ Syntax highlighting for textual diffs.
         display: block;
         opacity: 0;
         z-index: 1;
-        @apply(--line-icon-button)
+        @apply --line-icon-button;
       }
 
       #codeColumn {
