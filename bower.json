@@ -1,6 +1,6 @@
 {
   "name": "code-highlighter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Syntax highlighting for textual diffs",
   "authors": [
     "Preview-Code team"
