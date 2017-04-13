@@ -22,7 +22,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
       }
     </style>
 
-    <code-highlighter id="highlighter" code="{{code}}" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
+    <code-highlighter id="highlighter" code="{{code}}" language="[[language]]" before-start="{{beforeStart}}" after-start="{{afterStart}}" can-split="true"></code-highlighter>
     <comment-list list="[[comments]]"></comment-list>
     <add-comment on-add-comment="_addComment" hidden="{{hideAddComments}}" project="[[project]]" line-comment="true"></add-comment>
   </template>
@@ -52,7 +52,8 @@ This code may only be used under the BSD style license found in LICENSE.txt
         },
         startLine: Number,
         comments: Array,
-        project: Object
+        project: Object,
+        language: String
       },
 
       _splitCode: function (e) {

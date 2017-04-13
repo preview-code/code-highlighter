@@ -23,7 +23,7 @@ Syntax highlighting for textual diffs.
     <template is="dom-repeat" items="{{_chunks}}">
       <code-with-comment on-add-chunk-with-comment="_insertChunk" code="{{item.code}}" before-start="{{item.beforeStart}}" after-start="{{item.afterStart}}"
         comments="{{item.comments}}" _onHunkChange hide-comments="[[hideComments]]" start-line="{{item.startLine}}" project="[[project]]"
-        hide-add-comments="{{item.hideAddComments}}"></code-with-comment>
+        hide-add-comments="{{item.hideAddComments}}" language="[[language]]"></code-with-comment>
     </template>
 
   </template>
@@ -33,14 +33,17 @@ Syntax highlighting for textual diffs.
       is: 'hunk-element',
 
       observers: ['_onHunkChange(hunk.*)'],
+
       properties: {
         hunk: Object,
         hideComments: Boolean,
         project: Object,
+        language: String,
         _chunks: {
           type: Array,
         }
       },
+
       _insertChunk: function (e) {
         e.detail.comments = [];
         e.detail.hideAddComments = false;

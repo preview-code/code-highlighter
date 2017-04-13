@@ -115,8 +115,7 @@ Syntax highlighting for textual diffs.
         },
         language: {
           type: String,
-          reflectToAttribute: true,
-          notify: true
+          reflectToAttribute: true
         },
         beforeStart: {
           type: Number,
@@ -201,9 +200,8 @@ Syntax highlighting for textual diffs.
 
         Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
 
-        var h = hljs.highlightAuto(strippedCode);
+        var h = hljs.highlightAuto(strippedCode, [this.language]);
         Polymer.dom(this.$.code).innerHTML = h.value;
-        this.language = h.language;
         this._updateDiffLines(diffMarks);
       },
 
