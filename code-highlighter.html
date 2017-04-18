@@ -105,7 +105,7 @@ Syntax highlighting for textual diffs.
     Polymer({
       is: 'code-highlighter',
       observers: [
-        '_onDiffChange(code, beforeStart, afterStart)'
+        '_onDiffChange(code, beforeStart, afterStart, language)'
       ],
 
       properties: {
@@ -115,8 +115,7 @@ Syntax highlighting for textual diffs.
         },
         language: {
           type: String,
-          reflectToAttribute: true,
-          notify: true
+          reflectToAttribute: true
         },
         beforeStart: {
           type: Number,
@@ -156,55 +155,54 @@ Syntax highlighting for textual diffs.
         this.$.iconColumn.removeEventListener('mouseout', this._onMouseHover);
       },
 
-      _onDiffChange: function (code, beforeStart, afterStart) {
-        var lines = code.split('\n');
+      _onDiffChange: function (code, beforeStart, afterStart, language) {
+        this.debounce('render-diff', () => {
+          var lines = code.split('\n');
+          var before = beforeStart;
+          var after = afterStart;
 
-        var before = beforeStart;
-        var after = afterStart;
+          var markClass = this._markClass;
 
-        var markClass = this._markClass;
-
-        var createSpan = function (content, index, other) {
-          if (content !== '') {
-            return '<span class="linenumber" index="' + index + '">' + content + '</span>';
+          var createSpan = function (content, index, other) {
+            if (content !== '') {
+              return '<span class="linenumber" index="' + index + '">' + content + '</span>';
+            }
+            return '<span class="empty" index="' + index + '">' + other + '</span>';
           }
-          return '<span class="empty" index="' + index + '">' + other + '</span>';
-        }
 
-        var createIcon = function (index, before, after, mark) {
-          return '<div class=icon-' + markClass(mark) + '><iron-icon icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after + '></iron-icon></div>';
-        }
-
-        var beforeContent = '';
-        var afterContent = '';
-        var iconContent = '';
-        var strippedCode = [];
-        var diffMarks = [];
-        var amountLines = 0;
-        lines.forEach(function (line, index) {
-          if (!line.startsWith('\\')) {
-            beforeContent += createSpan(line.startsWith('+') ? '' : before++, index, after);
-            afterContent += createSpan(line.startsWith('-') ? '' : after++, index, before);
-            iconContent += createIcon(index, before, after, line.charAt(0));
-            strippedCode.push(line.substring(1));
-            diffMarks.push(line.charAt(0));
-            amountLines++;
+          var createIcon = function (index, before, after, mark) {
+            return '<div class=icon-' + markClass(mark) + '><iron-icon icon="icons:add-box" index=' + index + ' before=' + before + ' after=' + after + '></iron-icon></div>';
           }
-        });
-        this._setAmountLines(amountLines);
-        strippedCode = strippedCode.reduce(function (acc, line) {
-          return acc + '\n' + line;
-        });
 
-        Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
-        Polymer.dom(this.$.afterColumn).innerHTML = afterContent;
+          var beforeContent = '';
+          var afterContent = '';
+          var iconContent = '';
+          var strippedCode = [];
+          var diffMarks = [];
+          var amountLines = 0;
+          lines.forEach(function (line, index) {
+            if (!line.startsWith('\\')) {
+              beforeContent += createSpan(line.startsWith('+') ? '' : before++, index, after);
+              afterContent += createSpan(line.startsWith('-') ? '' : after++, index, before);
+              iconContent += createIcon(index, before, after, line.charAt(0));
+              strippedCode.push(line.substring(1));
+              diffMarks.push(line.charAt(0));
+              amountLines++;
+            }
+          });
+          this._setAmountLines(amountLines);
+          strippedCode = strippedCode.reduce(function (acc, line) {
+            return acc + '\n' + line;
+          });
 
-        Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
+          Polymer.dom(this.$.beforeColumn).innerHTML = beforeContent;
+          Polymer.dom(this.$.afterColumn).innerHTML = afterContent;
 
-        var h = hljs.highlightAuto(strippedCode);
-        Polymer.dom(this.$.code).innerHTML = h.value;
-        this.language = h.language;
-        this._updateDiffLines(diffMarks);
+          Polymer.dom(this.$.iconColumn).innerHTML = iconContent;
+          var h = hljs.highlightAuto(strippedCode, [this.language]);
+          Polymer.dom(this.$.code).innerHTML = h.value;
+          this._updateDiffLines(diffMarks);
+        }, 10);
       },
 
       _updateDiffLines: function (marks) {

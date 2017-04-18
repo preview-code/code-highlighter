@@ -11,17 +11,17 @@ This code may only be used under the BSD style license found in LICENSE.txt
   <title>code-with-comment tests</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
+  <link rel="import" href="../code-with-comment.html">
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
 
-  <link rel="import" href="../code-with-comment.html">
 </head>
 
 <body>
 
   <test-fixture id="basic">
     <template>
-      <code-with-comment>
+      <code-with-comment language="hs">
       </code-with-comment>
     </template>
   </test-fixture>
@@ -53,7 +53,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
       var startLines = [1, 16, 53, 430, 600, 2014];
       var user = { name: 'User', html_url: 'https://preview-code.com', avatar_url: 'https://preview-code.com' };
 
-      beforeEach(function () {
+      beforeEach(function (done) {
         elem = fixture('basic');
         lines = ['first line', 'second line', 'thrid line', 'fort knox'];
         elem.code = lines.join('\n');
@@ -61,12 +61,13 @@ This code may only be used under the BSD style license found in LICENSE.txt
         elem.afterStart = 1;
         elem.startLine = 1;
         elem.comments = ['test'];
+        setTimeout(done, 20);
       });
 
       testcases.forEach(function (testcase, index) {
         describe('<testing the split-line method> ' + index, function () {
 
-          beforeEach(function () {
+          beforeEach(function (done) {
             elem = fixture('basic');
             lines = ['first line', 'second line', 'thrid line', 'fort knox'];
             elem.code = lines.join('\n');
@@ -74,6 +75,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
             elem.afterStart = testcase.afterStart;
             elem.startLine = testcase.startLine;
             elem.comments = ['test'];
+            setTimeout(done, 20);
           });
 
           it('code is splitted correct', function (done) {
@@ -116,7 +118,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
           elem.startLine = startLine;
           var e = new Event('add-comment');
           var body = 'body of comment';
-          e.detail = body;
+          e.detail = {body: body};
 
           elem.addEventListener('add-comment', function (e) {
             assert.equal(e.detail.comment.position, lines.length + elem.startLine - 1);
@@ -148,7 +150,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
           elem.startLine = startLine;
           var e = new Event('add-comment');
           var body = 'body of comment';
-          e.detail = body;
+          e.detail =  {body: body};
           var amountComments = elem.comments.length;
           elem._addComment(e);
 
