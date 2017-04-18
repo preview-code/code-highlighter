@@ -10,20 +10,20 @@ This code may only be used under the BSD style license found in LICENSE.txt
   <meta charset="UTF-8">
   <title>code-highlighter tests</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="import" href="../code-highlighter.html">
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
   <script src="../../iron-test-helpers/mock-interactions.js"></script>
   <script src='test-diffs.js'></script>
 
-  <link rel="import" href="../code-highlighter.html">
 </head>
 
 <body>
 
   <test-fixture id="basic">
     <template>
-      <code-highlighter>
+      <code-highlighter language="js">
       </code-highlighter>
     </template>
   </test-fixture>
@@ -31,13 +31,14 @@ This code may only be used under the BSD style license found in LICENSE.txt
     describe('<code-highlighter>', function () {
       var elem;
 
-      beforeEach(function () {
+      beforeEach(function (done) {
         elem = fixture('basic');
-        elem.code = 'first line \n second line';
+        elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
         elem.beforeStart = 0;
         elem.afterStart = 1;
         elem.canSplit = true;
         elem.index = 0;
+        setTimeout(done, 20);
       });
 
       it('tap button fires event', function (done) {
@@ -48,12 +49,11 @@ This code may only be used under the BSD style license found in LICENSE.txt
           done();
         });
         var icon = Polymer.dom(elem.root).querySelector('iron-icon');
-        MockInteractions.tap(icon);
+        MockInteractions.tap(icon)
       });
 
       for (var count = 0; count < 14; count++) {
         it('tapping all buttons, fires events', function (done) {
-          elem.code = 'display: inline-block;\n        padding: 3px 6px;\n        border-radius: 6px;\n-       color: var(--primary-background-color);\n-       color: var(--tag-text-color);\n-       background-color: var(--pr-status-color);\n-       background-color: var(--tag-color);\n+       color: var(--primary-background-color, --tag-text-color);\n+       background-color: var(--pr-status-color, --tag-color);\n+       overflow: hidden;\n+       text-overflow: ellipsis;\n+       max-width: 120%;\n      }\n      iron-icon {\n        vertical-align: text-bottom;"';
           elem.addEventListener('click-line', function (e) {
             assert.equal(e.detail.lineNumber, count);
             done();
@@ -86,7 +86,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
       });
 
       it('should have correct value for amountLines', function() {
-        assert.equal(elem.amountLines, 2);
+        assert.equal(elem.amountLines, 15);
       });
     });
 
@@ -94,11 +94,12 @@ This code may only be used under the BSD style license found in LICENSE.txt
     testDiffs.forEach(function (diff) {
       describe('diff: ' + diff.index, function () {
         var diffElem;
-        beforeEach(function () {
+        beforeEach(function (done) {
           diffElem = fixture('basic');
           diffElem.code = diff.changes;
           diffElem.beforeStart = diff.linesChanged.startLineBefore;
           diffElem.afterStart = diff.linesChanged.startLineAfter;
+          setTimeout(done, 20);
         });
 
         it('shows correct amount of `before` lines', function () {
