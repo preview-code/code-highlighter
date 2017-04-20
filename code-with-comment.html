@@ -82,9 +82,10 @@ This code may only be used under the BSD style license found in LICENSE.txt
 
       _addComment: function (e) {
         var newComment = {};
-        newComment.body = e.detail;
+        newComment.body = e.detail.body;
         newComment.position = this.startLine + this.$.highlighter.amountLines - 1;
         newComment.type = 'line';
+        var stop = e.detail.stopLoading;
         e.stopPropagation();
 
         var submit = function (user) {
@@ -93,7 +94,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
           this.push('comments', newComment);
         }.bind(this);
 
-        this.fire('add-comment', { comment: newComment, onSuccess: submit });
+        this.fire('add-comment', { comment: newComment, stopLoading: stop, onSuccess: submit });
       }
     });
   </script>

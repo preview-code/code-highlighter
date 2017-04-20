@@ -118,7 +118,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
           elem.startLine = startLine;
           var e = new Event('add-comment');
           var body = 'body of comment';
-          e.detail = body;
+          e.detail = {body: body};
 
           elem.addEventListener('add-comment', function (e) {
             assert.equal(e.detail.comment.position, lines.length + elem.startLine - 1);
@@ -150,7 +150,7 @@ This code may only be used under the BSD style license found in LICENSE.txt
           elem.startLine = startLine;
           var e = new Event('add-comment');
           var body = 'body of comment';
-          e.detail = body;
+          e.detail =  {body: body};
           var amountComments = elem.comments.length;
           elem._addComment(e);
 
