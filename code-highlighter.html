@@ -92,7 +92,7 @@ Syntax highlighting for textual diffs.
 
     <div id="beforeColumn"></div>
     <div id="afterColumn"></div>
-    <div id="iconColumn" on-tap="_splitChunk" hidden$="[[!canSplit]]"></div>
+    <div id="iconColumn" on-tap="_clickedLine" hidden$="[[!linesClickable]]"></div>
     <div id="codeColumn">
       <div id="diffColors"></div>
       <pre><code id="code"></code></pre>
@@ -130,7 +130,7 @@ Syntax highlighting for textual diffs.
           notify: true,
           readOnly: true
         },
-        canSplit: {
+        linesClickable: {
           type: Boolean,
           value: false
         }
@@ -220,7 +220,7 @@ Syntax highlighting for textual diffs.
         Polymer.dom(this.$.diffColors).innerHTML = content;
       },
 
-      _splitChunk: function (e) {
+      _clickedLine: function (e) {
         var path = e.target;
         if (path.localName === 'iron-icon') {
           var lineInfo = {};
